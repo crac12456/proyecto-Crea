@@ -67,25 +67,6 @@ float medicion_de_ph(){
 
 }
 
-
-char GPS(){
-    unsigned long start = millis(); //conseguimos el tiempo desde que se empezo el arduino
-
-    //verificamos que no tarde en conectarse el GPS
-    while (millis() - start < 1000){ 
-        //verificamos que el GPS se pueda utilizar 
-        while(gpsSerial.available() > 0){ 
-            gps.encode(gpsSerial.read());
-        }
-    } 
-
-    /*
-    * recuerda declarar las variables de los datos del GPS 
-    * https://randomnerdtutorials.com/esp32-neo-6m-gps-module-arduino/
-    */
-    
-}
-
 float medicion_temperatura(){
 
     float temp;
