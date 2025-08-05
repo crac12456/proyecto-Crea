@@ -68,14 +68,12 @@ float medicion_de_ph(){
 }
 
 float medicion_temperatura(){
-
     float temp;
 
     sensores.requestTemperatures(); //le indicamos a los senores que consigan la temperatura
     temp = sensores.getTempCByIndex(0); //conseguimos la temperatura en °C de los sensores
 
     return temp;
-
 }
 
 //seccion motores 

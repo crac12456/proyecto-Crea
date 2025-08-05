@@ -15,6 +15,9 @@ float medicion_de_turbidez();
 float medicion_de_ph();
 float medicion_temperatura();
 
+//para indicar mediante la luz
+void indicador(int cant);
+
 #ifdef __cplusplus
 }
 #endif

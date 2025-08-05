@@ -1,45 +1,56 @@
 #include <Arduino.h>
+#include <stdbool.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <TinyGPSPlus.h>
 #include <HardwareSerial.h>
-#include <esp_camera.h>
+#include <PubSubClient.h>
 #include <SPI.h>
 #include <WiFi.h>
-#include <HTTPClient.h>
 
 #include "funciones.h"
 #include "config.h"
- 
-//set up del sensor de temperatura 
-OneWire sensor_de_temperatura(sensor_de_temp);
-DallasTemperature sensores(&sensor_de_temperatura);
-
-//set up del gps
-TinyGPSPlus gps;
-HardwareSerial gpsSerial(2);
-
-unsigned long tiempo_desde_inicio = millis(); //conseguimos el tiempo desde que se empezo el arduino
+#include "test.h"
 
 void setup() {
+  Serial.begin(115200);
+
+  //set up del gps
   sensores.begin();
   gpsSerial.begin(gps_bauds, SERIAL_8N1, gps_RX, gps_TX);
+  
+  //comprobamos que el wifi se conecte correctamente
+  WiFi.begin(ssid, password);
+  if(WiFi.status() != WL_CONNECTED){
+    indicador(2, 1);
+  }
+
+  client.setServer(mqtt_server, mqtt_port);
+  while(!client.connected()){
+    indicador(0, 0);
+    if(client.connect("ESP32cliente", mqtt_user, mqtt_pasword)){
+      indicador(3, 2);
+    }
+    else{
+      indicador_fallo(10);
+    }
+  }
+
+  
+  indicador(1, 2); //indicamos que el setup se termino correctamente 
 }
 
 void loop() {
 
-//comprovamo que el gps este conectado correctamente 
-while (millis() - tiempo_desde_inicio < 1000){ 
-   //leemos el gps
-  while(gpsSerial.available() > 0){ 
-    gps.encode(gpsSerial.read());
+  //comprovamo que el gps este conectado correctamente 
+  while (test_gps()){ 
+    //leemos el gps
+    while(gpsSerial.available() > 0){ 
+      gps.encode(gpsSerial.read());
     }
- }  
+  }  
 
- //variables del gps
-double latitud = gps.location.lat(); //asignacion la latitud del gps a una variable
-double longitud = gps.location.lng(); //asigna la longitud del gps a una variable 
-float velocidad = gps.speed.kmph(); //asigna la velocidad del gps a una variable
-float altitud = gps.altitude.meters(); //asigna la altura del gps a una variable 
+  //mas info: https://www.prometec.net/esp32-mqtt/
+
   
 }
