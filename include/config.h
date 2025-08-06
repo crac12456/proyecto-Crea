@@ -26,12 +26,18 @@
 #define gps_TX 16
 #define gps_bauds 9600
 
+//leds
+#define led_interno 2
+
 //constantes globales para wifi
-const char* ssid = "wifi name"; //ingresar la web
-const char* password = "wifi pasword"; //ingresar contraseña
+const char* ssid = "AREA DE INFORMÀTICA"; //ingresar la web
+const char* password = "UEPSIMAINFO*2025*@"; //ingresar contraseña
+
+//constantes de la coneccion con mqtt
 const char* mqtt_server = "server";
 const int mqtt_port = 0000;
 const char* mqtt_pasword = "password";
+const char* mqtt_user = "esp_1";
 
 //set up del sensor de temperatura
 extern OneWire sensor_de_temperatura;
@@ -48,5 +54,15 @@ extern int tiempo_max_ms;
 //set up de las comunicaciones, wifi y MQTT
 extern WiFiClient espClient;
 extern PubSubClient client;
+
+extern double latitud = gps.location.lat();
+extern double longitud = gps.location.lng(); 
+extern float velocidad = gps.speed.kmph(); 
+extern float altitud = gps.altitude.meters(); 
+
+extern float ph = medicion_de_ph();
+extern float turbidez = medicion_de_turbidez();
+extern float temperatura = medicion_temperatura();
+
 
 #endif

@@ -6,6 +6,7 @@
 #include <PubSubClient.h>
 
 #include "config.h"
+#include "funciones.h"
 
 //set up del sensor de temperatura 
 OneWire sensor_de_temperatura(sensor_de_temp);
@@ -30,4 +31,6 @@ double longitud = gps.location.lng();
 float velocidad = gps.speed.kmph(); 
 float altitud = gps.altitude.meters(); 
 
-
+float ph = medicion_de_ph();
+float turbidez = medicion_de_turbidez();
+float temperatura = medicion_temperatura();

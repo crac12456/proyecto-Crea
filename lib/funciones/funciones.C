@@ -112,3 +112,43 @@ void motores_derecha(){
     digitalWrite(motor_izquierda_2, HIGH);
 
 }
+
+//comprobar que todo este correcto
+void indicador(int cant, int vel){
+
+    vel *= 100;
+
+    if(cant == 0 && vel == 0){
+        goto permanente;
+    }
+
+    for(int i = 0; i >= cant; i++){
+        digitalWrite(led_interno, HIGH);
+        delay(vel);
+        digitalWrite(led_interno, LOW);
+        delay(vel);
+    }
+    delay(1000);
+
+    permanente:
+        digitalWrite(led_interno, HIGH);
+
+}
+
+void indicador_fallo(int cant){
+
+    for(int i = 0; i <= cant; i++){
+        digitalWrite(led_interno, HIGH);
+        delay(1000);
+        digitalWrite(led_interno, LOW);
+        delay(100);
+        digitalWrite(led_interno, HIGH);
+        delay(2000);
+        digitalWrite(led_interno, LOW);
+        delay(100);
+        digitalWrite(led_interno, HIGH);
+        delay(1000);
+        digitalWrite(led_interno, LOW);
+        delay(100);
+    }
+}

@@ -12,6 +12,7 @@
 #include "config.h"
 #include "test.h"
 
+
 void setup() {
   Serial.begin(115200);
 
@@ -25,7 +26,9 @@ void setup() {
     indicador(2, 1);
   }
 
+  //conectar con el broker
   client.setServer(mqtt_server, mqtt_port);
+  //intentar conectarse al broker
   while(!client.connected()){
     indicador(0, 0);
     if(client.connect("ESP32cliente", mqtt_user, mqtt_pasword)){
@@ -50,7 +53,25 @@ void loop() {
     }
   }  
 
-  //mas info: https://www.prometec.net/esp32-mqtt/
+  //creo un json el cual tendra los datos de los sensores 
+  String sensores_json = "{";
+  sensores_json += "\"temperatura\":" + String(temperatura) + ",";
+  sensores_json += "\"ph\":" + String(ph) + ",";
+  sensores_json += "\"turbidez\":" + String(turbidez) + ",";
+  sensores_json += "}";
 
+  //envio el json con los datos de los sensores
+  client.publish("sensores/ambiente", sensores_json.c_str());
   
+  //creo un json con los datos del gps
+  String gps_json = "{";
+  gps_json += "\"latitud\":" + String(latitud) + ",";
+  gps_json += "\"longitud\":" + String(longitud) + ",";
+  gps_json += "\"velocidad\":" + String(velocidad) + ",";
+  gps_json += "\"altitud\":" + String(altitud) + ",";
+  gps_json += "}";
+
+  //envio los datos 
+  client.publish("sensores/gps", gps_json.c_str());
+
 }

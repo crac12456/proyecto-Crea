@@ -16,7 +16,8 @@ float medicion_de_ph();
 float medicion_temperatura();
 
 //para indicar mediante la luz
-void indicador(int cant);
+void indicador(int cant, int vel);
+void indicador_fallo(int cant);
 
 #ifdef __cplusplus
 }
