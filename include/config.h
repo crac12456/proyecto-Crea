@@ -4,6 +4,7 @@
  * * Header de configuracion, aqui se declaran las variables gobales que se usaran * * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
  */
+
 #ifndef CONFIG_H
 #define CONFIG_H
 
@@ -55,14 +56,15 @@ extern int tiempo_max_ms;
 extern WiFiClient espClient;
 extern PubSubClient client;
 
+//declaracion de las variables del gps, estas se enviaran por mqtt
 extern double latitud = gps.location.lat();
 extern double longitud = gps.location.lng(); 
 extern float velocidad = gps.speed.kmph(); 
 extern float altitud = gps.altitude.meters(); 
 
+//variables de los sensores con el mismo propisito
 extern float ph = medicion_de_ph();
 extern float turbidez = medicion_de_turbidez();
 extern float temperatura = medicion_temperatura();
-
 
 #endif
