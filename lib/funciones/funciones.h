@@ -9,6 +9,7 @@ extern "C" {
 void motores_adelante();
 void motores_izquierda();
 void motores_derecha();
+void motores_detener();
 
 //sensores
 float medicion_de_turbidez(); 

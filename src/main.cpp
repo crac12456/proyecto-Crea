@@ -51,6 +51,7 @@ void setup()
   gpsSerial.begin(gps_bauds, SERIAL_8N1, gps_RX, gps_TX);
 
   // funcion en redes.h, conecta el esp32 con la red wifi
+  client.setCallback(callback);
   conectar_wifi();
 
   // funcion en redes.h, conecta el esp32 con el broker mqtt
@@ -84,6 +85,22 @@ void loop()
   gps_json += "\"altitud\":" + String(altitud) + ",";
   gps_json += "}";
 
+  if(mensaje == "adelante"){
+    motores_adelante();
+  }
+  else if(mensaje == "izquierda"){
+    motores_izquierda();
+  }
+  else if(mensaje == "derecha"){
+    motores_derecha();
+  }
+  else{
+    motores_detener();
+  }
+
+
   // envio los datos
   client.publish("sensores/gps", gps_json.c_str());
 }
+
+

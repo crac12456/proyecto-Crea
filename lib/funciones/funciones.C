@@ -123,7 +123,6 @@ void motores_izquierda()
 
 void motores_derecha()
 {
-
     // le decimos al motor derecho detenerse
     digitalWrite(motor_derecha_1, LOW);
     digitalWrite(motor_derecha_2, LOW);
@@ -131,6 +130,16 @@ void motores_derecha()
     // le decimos al motor derecho acelerar
     digitalWrite(motor_izquierda_1, LOW);
     digitalWrite(motor_izquierda_2, HIGH);
+}
+
+void motores_detener(){
+    // le decimos al motor derecho detenerse
+    digitalWrite(motor_derecha_1, LOW);
+    digitalWrite(motor_derecha_2, LOW);
+
+    // le decimos al motor derecho acelerar
+    digitalWrite(motor_izquierda_1, LOW);
+    digitalWrite(motor_izquierda_2, LOW);
 }
 
 /*

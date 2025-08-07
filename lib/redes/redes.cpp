@@ -47,9 +47,20 @@ void gps_coneccion()
 
 bool test_gps()
 {
+    unsigned long tiempo_desde_inicio = millis();
+    int tiempo_max_ms = 1000;
+    
     while (millis() - tiempo_desde_inicio < tiempo_max_ms)
     {
         return true;
     }
     return false;
+}
+
+void callback(char* topic, byte* payload, unsigned int lenght){
+    String mensaje;
+    for(int i = 0; i <= lenght; i++){
+        mensaje += (char)payload[i];
+    }
+
 }
