@@ -11,7 +11,6 @@
 
 #include "funciones.h"
 #include "config.h"
-#include "test.h"
 #include "redes.h"
 
 /*
@@ -87,7 +86,7 @@ void loop()
   char buffer[256];
   size_t n = serializeJson(doc, buffer);
 
-  client.publish("esp32/sensores", buffer, n);
+  client.publish(topic_sub, buffer, n);
 
   //en el apartado redes, se realiza la llamada y recibe el mensaje en la variable "mensaje"
   if(mensaje == "adelante"){

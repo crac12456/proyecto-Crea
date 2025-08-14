@@ -17,6 +17,8 @@ const char* mqtt_server = "server";
 const int mqtt_port = 0000;
 const char* mqtt_pasword = "password";
 const char* mqtt_user = "esp_1";
+const char* topic_sub = "esp32/sensores";
+
 
 //set up del sensor de temperatura 
 OneWire sensor_de_temperatura(sensor_de_temp);

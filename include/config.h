@@ -39,6 +39,7 @@ extern const char* mqtt_server;
 extern const int mqtt_port;
 extern const char* mqtt_pasword;
 extern const char* mqtt_user;
+extern const char* topic_sub;
 
 //set up del sensor de temperatura
 extern OneWire sensor_de_temperatura;
