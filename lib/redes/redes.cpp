@@ -58,9 +58,8 @@ bool test_gps()
 }
 
 void callback(char* topic, byte* payload, unsigned int lenght){
-    String mensaje;
+    String mensaje = "";
     for(int i = 0; i <= lenght; i++){
         mensaje += (char)payload[i];
     }
-
 }

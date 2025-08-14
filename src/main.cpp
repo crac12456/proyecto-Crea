@@ -7,6 +7,7 @@
 #include <PubSubClient.h>
 #include <SPI.h>
 #include <WiFi.h>
+#include <ArduinoJson.h>
 
 #include "funciones.h"
 #include "config.h"
@@ -23,9 +24,7 @@ void setup()
 {
   Serial.begin(115200);
 
-  /*
-   * Set up de los pines del ESP32  
-   */
+// ================== Set up de los pines ==================
 
   //gps
   pinMode(led_interno, OUTPUT);
@@ -45,6 +44,8 @@ void setup()
   //gps
   pinMode(gps_RX, INPUT);
   pinMode(gps_TX, OUTPUT);
+
+// ================== Set up de sensores, etc ==================
 
   // set up del gps
   sensores.begin();
@@ -67,24 +68,28 @@ void loop()
   // comprovamo que el gps este conectado correctamente
   gps_coneccion();
 
-  // creo un json el cual tendra los datos de los sensores
-  String sensores_json = "{";
-  sensores_json += "\"temperatura\":" + String(temperatura) + ",";
-  sensores_json += "\"ph\":" + String(ph) + ",";
-  sensores_json += "\"turbidez\":" + String(turbidez) + ",";
-  sensores_json += "}";
+  //================== Creacion de un Json para enviar los datos ==================
+  StaticJsonDocument<256> doc;
 
-  // envio el json con los datos de los sensores
-  client.publish("sensores/ambiente", sensores_json.c_str());
+  doc["Dispositivo"] = "Esp32-1";
 
-  // creo un json con los datos del gps
-  String gps_json = "{";
-  gps_json += "\"latitud\":" + String(latitud) + ",";
-  gps_json += "\"longitud\":" + String(longitud) + ",";
-  gps_json += "\"velocidad\":" + String(velocidad) + ",";
-  gps_json += "\"altitud\":" + String(altitud) + ",";
-  gps_json += "}";
+  JsonObject sensores = doc.createNestedObject("Sensores");
+  sensores["temperatura"] = temperatura;
+  sensores["pH"] = ph;
+  sensores["turbidez"] = turbidez;
 
+  JsonObject gps = doc.createNestedObject("Gps");
+  gps["latitud"] = latitud;
+  gps["longitud"] = longitud;
+  gps["altitud"] = altitud;
+  gps["velocidad"] = velocidad;
+
+  char buffer[256];
+  size_t n = serializeJson(doc, buffer);
+
+  client.publish("esp32/sensores", buffer, n);
+
+  //en el apartado redes, se realiza la llamada y recibe el mensaje en la variable "mensaje"
   if(mensaje == "adelante"){
     motores_adelante();
   }
@@ -98,9 +103,6 @@ void loop()
     motores_detener();
   }
 
-
-  // envio los datos
-  client.publish("sensores/gps", gps_json.c_str());
 }
 
 
