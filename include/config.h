@@ -36,7 +36,7 @@ extern const char *password; // ingresar contraseña
 
 // constantes de la coneccion con mqtt
 extern const char *mqtt_server;
-extern const int *mqtt_port;
+extern const int mqtt_port;
 extern const char *mqtt_password;
 extern const char *mqtt_user;
 extern const char *topic_sub;
@@ -56,6 +56,7 @@ extern int tiempo_max_ms;
 // set up de las comunicaciones, wifi y MQTT
 extern WiFiClient espClient;
 extern PubSubClient client;
+extern String mensaje;
 
 // declaracion de las variables del gps, estas se enviaran por mqtt
 extern double latitud;

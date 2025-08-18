@@ -1,3 +1,17 @@
+/*
+
+#ifndef REDES_H
+#define REDES_H
+
+void conectar_wifi();
+void mqtt_reconect();
+void gps_coneccion();
+void callback(char* topic, byte* payload, unsigned int lenght);
+
+extern String mensaje; 
+
+#endif
+
 #include <Arduino.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
@@ -8,7 +22,6 @@
 #include "funciones.h"
 #include "redes.h"
 
-/*
 void conectar_wifi()
 {
     WiFi.begin(ssid, password);

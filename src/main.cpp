@@ -11,7 +11,7 @@
 
 #include "funciones.h"
 #include "config.h"
-#include "redes.h"
+
 
 void conectar_wifi()
 {
@@ -125,8 +125,8 @@ void loop()
   gps_coneccion();
 
   //================== Creacion de un Json para enviar los datos ==================
-  unsigned int N;
-  JsonDocument<N> doc;
+  
+  StaticJsonDocument<256> doc;
 
   doc["Dispositivo"] = "Esp32-1";
 
