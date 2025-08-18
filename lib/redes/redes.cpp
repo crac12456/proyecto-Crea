@@ -6,8 +6,9 @@
 
 #include "config.h"
 #include "funciones.h"
+#include "redes.h"
 
-
+/*
 void conectar_wifi()
 {
     WiFi.begin(ssid, password);
@@ -23,7 +24,7 @@ void mqtt_reconect()
     client.setServer(mqtt_server, mqtt_port);
     while (!client.connected())
     {
-        if (client.connect("ESP32_principal", mqtt_user, mqtt_pasword))
+        if (client.connect("ESP32_principal", mqtt_user, mqtt_password))
         {
             indicador(3, 2);
         }
@@ -62,4 +63,4 @@ void callback(char* topic, byte* payload, unsigned int lenght){
     for(int i = 0; i <= lenght; i++){
         mensaje += (char)payload[i];
     }
-}
+}*/

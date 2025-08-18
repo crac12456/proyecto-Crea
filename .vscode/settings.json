@@ -2,5 +2,6 @@
     "files.associations": {
         "funciones.C": "cpp"
     },
-    "C_Cpp.default.compilerPath": "C:/Users/HP/.platformio/packages/toolchain-xtensa-esp32/bin/xtensa-esp32-elf-gcc.exe"
+    "C_Cpp.default.compilerPath": "C:/Users/HP/.platformio/packages/toolchain-xtensa-esp32/bin/xtensa-esp32-elf-gcc.exe",
+    "C_Cpp.errorSquiggles": "disabled"
 }
