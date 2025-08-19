@@ -2,6 +2,7 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <TinyGPSPlus.h>
+#include <math.h>
 
 #include "funciones.h"
 #include "config.h"
@@ -53,7 +54,7 @@ float medicion_de_turbidez()
 }
 
 // Hacemos esta funcion para redondear el voltaje
-float redondeo(int medicion)
+float redondeo(float medicion)
 {
     float multiplicador = powl(10.0f, 1);
     medicion = roundf(medicion * multiplicador) / multiplicador;
@@ -156,7 +157,7 @@ void indicador(int cant, int vel)
         goto permanente;
     }
 
-    for (int i = 0; i >= cant; i++)
+    for (int i = 0; i < cant; i++)
     {
         digitalWrite(led_interno, HIGH);
         delay(vel);

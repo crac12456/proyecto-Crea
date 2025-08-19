@@ -12,69 +12,17 @@
 #include "funciones.h"
 #include "config.h"
 
-
-void conectar_wifi()
-{
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    indicador(0, 0);
-  }
-  indicador(2, 1);
-}
-
-void mqtt_reconect()
-{
-  client.setServer(mqtt_server, mqtt_port);
-  while (!client.connected())
-  {
-    if (client.connect("ESP32_principal", mqtt_user, mqtt_password))
-    {
-      indicador(3, 2);
-    }
-    else
-    {
-      indicador_fallo(10);
-    }
-  }
-}
-
-bool test_gps()
-{
-  unsigned long tiempo_desde_inicio = millis();
-  int tiempo_max_ms = 1000;
-
-  while (millis() - tiempo_desde_inicio < tiempo_max_ms)
-  {
-    return true;
-  }
-  return false;
-}
-void gps_coneccion()
-{
-  while (test_gps())
-  {
-    while (gpsSerial.available() > 0)
-    {
-      gps.encode(gpsSerial.read());
-    }
-  }
-}
-
-void callback(char *topic, byte *payload, unsigned int lenght)
-{
-  String mensaje = "";
-  for (int i = 0; i <= lenght; i++)
-  {
-    mensaje += (char)payload[i];
-  }
-}
+bool test_gps();
+void conectar_wifi();
+void mqtt_reconect();
+void gps_coneccion();
+void callback(char *topic, byte *payload, unsigned int lenght);
 
 /*
- * Codigo principal del proyecto
- * todas las funciones se encuentran ordenas en sus respectivos archivos
- * el main se concentra en inicializar lo necesario y
- */
+* Codigo principal del proyecto
+* todas las funciones se encuentran ordenas en sus respectivos archivos
+* el main se concentra en inicializar lo necesario y
+*/
 
 void setup()
 {
@@ -120,31 +68,39 @@ void setup()
 
 void loop()
 {
+  if (gps.location.isValid()) {
+    latitud = gps.location.lat();
+    longitud = gps.location.lng();
+    altitud = gps.altitude.meters();
+    velocidad = gps.speed.kmph();
+  }
 
-  // comprovamo que el gps este conectado correctamente
+  temperatura = medicion_temperatura();
+  ph = medicion_de_ph();
+  turbidez = medicion_de_turbidez();
+
+  // comproamo que el gps este conectado correctamente
   gps_coneccion();
 
   //================== Creacion de un Json para enviar los datos ==================
-  
-  StaticJsonDocument<256> doc;
+  StaticJsonDocument<200> doc;
 
   doc["Dispositivo"] = "Esp32-1";
 
-  JsonObject sensores = doc.createNestedObject("Sensores");
-  sensores["temperatura"] = temperatura;
-  sensores["pH"] = ph;
-  sensores["turbidez"] = turbidez;
+  JsonObject sensoresObj = doc.createNestedObject("Sensores"); 
+  sensoresObj["temperatura"] = temperatura;
+  sensoresObj["pH"] = ph;
+  sensoresObj["turbidez"] = turbidez;
 
-  JsonObject gps = doc.createNestedObject("Gps");
-  gps["latitud"] = latitud;
-  gps["longitud"] = longitud;
-  gps["altitud"] = altitud;
-  gps["velocidad"] = velocidad;
-
+  JsonObject gpsObj = doc.createNestedObject("Gps");
+  gpsObj["latitud"] = latitud;
+  gpsObj["longitud"] = longitud;
+  gpsObj["altitud"] = altitud;
+  gpsObj["velocidad"] = velocidad;
   char buffer[256];
   size_t n = serializeJson(doc, buffer);
 
-  client.publish(topic_sub, buffer, n);
+  client.publish(topic_sub, (uint8_t*)buffer, (unsigned int)n);
 
   // en el apartado redes, se realiza la llamada y recibe el mensaje en la variable "mensaje"
   if (mensaje == "adelante")
@@ -174,4 +130,69 @@ void loop()
   Serial.print(altitud);
   Serial.println("la velocidad es: ");
   Serial.print(velocidad);
+
+  delay(1000);
 }
+
+bool test_gps()
+{
+  unsigned long tiempo_desde_inicio = millis();
+  int tiempo_max_ms = 1000;
+
+  while (millis() - tiempo_desde_inicio < tiempo_max_ms)
+  {
+    if (gpsSerial.available()){
+      return true;
+    }
+    delay(10);
+  }
+  return false;
+}
+
+void conectar_wifi()
+{
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    indicador(0, 0);
+  }
+  indicador(2, 1);
+}
+
+void mqtt_reconect()
+{
+  client.setServer(mqtt_server, mqtt_port);
+  while (!client.connected())
+  {
+    if (client.connect("ESP32_principal", mqtt_user, mqtt_password))
+    {
+      indicador(3, 2);
+    }
+    else
+    {
+      indicador_fallo(10);
+    }
+  }
+}
+
+
+void gps_coneccion()
+{
+  while (test_gps())
+  {
+    while (gpsSerial.available() > 0)
+    {
+      gps.encode(gpsSerial.read());
+    }
+  }
+}
+
+void callback(char *topic, byte *payload, unsigned int length)  // length, no lenght
+{
+  mensaje = "";  
+  for (int i = 0; i < length; i++)  
+  {
+    mensaje += (char)payload[i];
+  }
+}
+

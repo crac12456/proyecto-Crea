@@ -8,6 +8,16 @@
 #include "config.h"
 #include "funciones.h"
 
+//inicializacion de
+double latitud = 0;
+double longitud = 0;
+float velocidad = 0.0f;
+float altitud = 0.0f;
+float ph = 0.0f;
+float turbidez = 0.0f;
+float temperatura = 0.0f;
+
+
 // constantes globales para wifi
 const char *ssid = "AREA DE INFORMÀTICA";    // ingresar la web
 const char *password = "UEPSIMAINFO*2025*!"; // ingresar contraseña
@@ -15,7 +25,7 @@ const char *password = "UEPSIMAINFO*2025*!"; // ingresar contraseña
 // constantes de la coneccion con mqtt
 const char *mqtt_server = "server";
 const int mqtt_port = 0000;
-const char *mqtt_pasword = "password";
+const char *mqtt_password = "password";
 const char *mqtt_user = "esp_1";
 const char *topic_sub = "esp32/sensores";
 
@@ -37,12 +47,3 @@ String mensaje = "";
 unsigned long tiempo_desde_inicio = millis();
 int tiempo_max_ms = 1000;
 
-// variables del gps
-double latitud = gps.location.lat();
-double longitud = gps.location.lng();
-float velocidad = gps.speed.kmph();
-float altitud = gps.altitude.meters();
-
-float ph = medicion_de_ph();
-float turbidez = medicion_de_turbidez();
-float temperatura = medicion_temperatura();

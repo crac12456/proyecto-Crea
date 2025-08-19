@@ -16,6 +16,8 @@ float medicion_de_turbidez();
 float medicion_de_ph();
 float medicion_temperatura();
 
+float redondeo(float medicion);
+
 //para indicar mediante la luz
 void indicador(int cant, int vel);
 void indicador_fallo(int cant);
