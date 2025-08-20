@@ -17,12 +17,14 @@ void conectar_wifi();
 void mqtt_reconect();
 void gps_coneccion();
 void callback(char *topic, byte *payload, unsigned int lenght);
+void envio_de_datos();
+void debug_info();
 
 /*
-* Codigo principal del proyecto
-* todas las funciones se encuentran ordenas en sus respectivos archivos
-* el main se concentra en inicializar lo necesario y
-*/
+ * Codigo principal del proyecto
+ * todas las funciones se encuentran ordenas en sus respectivos archivos
+ * el main se concentra en inicializar lo necesario y
+ */
 
 void setup()
 {
@@ -51,12 +53,13 @@ void setup()
 
   // ================== Set up de sensores, etc ==================
 
+  client.setCallback(callback);
+
   // set up del gps
   sensores.begin();
   gpsSerial.begin(gps_bauds, SERIAL_8N1, gps_RX, gps_TX);
 
   // funcion en redes.h, conecta el esp32 con la red wifi
-  client.setCallback(callback);
   conectar_wifi();
 
   // funcion en redes.h, conecta el esp32 con el broker mqtt
@@ -64,16 +67,28 @@ void setup()
 
   // indicamos que el setup se termino correctamente
   indicador(1, 2);
+
+  motores_detener();
 }
 
 void loop()
 {
-  if (gps.location.isValid()) {
-    latitud = gps.location.lat();
-    longitud = gps.location.lng();
-    altitud = gps.altitude.meters();
-    velocidad = gps.speed.kmph();
+
+  if (!client.connected())
+  {
+    Serial.print("conectando a mqtt");
+    mqtt_reconect();
   }
+
+  client.loop();
+
+  if (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.print("Conecting wifi");
+    conectar_wifi();
+  }
+
+  gps_coneccion();
 
   temperatura = medicion_temperatura();
   ph = medicion_de_ph();
@@ -82,27 +97,141 @@ void loop()
   // comproamo que el gps este conectado correctamente
   gps_coneccion();
 
-  //================== Creacion de un Json para enviar los datos ==================
-  StaticJsonDocument<200> doc;
+  static unsigned long ultimo_envio = 0;
+  if (millis() - ultimo_envio >= 2000)
+  {
+    ultimo_envio = millis();
 
-  doc["Dispositivo"] = "Esp32-1";
+    if (gps.location.isValid())
+    {
+      latitud = gps.location.lat();
+      longitud = gps.location.lng();
+      altitud = gps.altitude.meters();
+      velocidad = gps.speed.kmph();
 
-  JsonObject sensoresObj = doc.createNestedObject("Sensores"); 
-  sensoresObj["temperatura"] = temperatura;
-  sensoresObj["pH"] = ph;
-  sensoresObj["turbidez"] = turbidez;
+      temperatura = medicion_temperatura();
+      ph = medicion_de_ph();
+      turbidez = medicion_de_turbidez();
 
-  JsonObject gpsObj = doc.createNestedObject("Gps");
-  gpsObj["latitud"] = latitud;
-  gpsObj["longitud"] = longitud;
-  gpsObj["altitud"] = altitud;
-  gpsObj["velocidad"] = velocidad;
-  char buffer[256];
-  size_t n = serializeJson(doc, buffer);
+      envio_de_datos();
 
-  client.publish(topic_sub, (uint8_t*)buffer, (unsigned int)n);
+      digitalWrite(led_interno, !digitalRead(led_interno));
+    }
+    else
+    {
+      Serial.println("esperando coneccion con el gps");
+    }
+  }
 
-  // en el apartado redes, se realiza la llamada y recibe el mensaje en la variable "mensaje"
+  // para debuggin
+  Serial.println("la temperatura es: ");
+  Serial.print(temperatura);
+  Serial.println("la latitud es: ");
+  Serial.print(latitud);
+  Serial.println("la longitud es: ");
+  Serial.print(longitud);
+  Serial.println("la altitud es: ");
+  Serial.print(altitud);
+  Serial.println("la velocidad es: ");
+  Serial.print(velocidad);
+}
+
+bool test_gps()
+{
+  unsigned long tiempo_desde_inicio = millis();
+  const int tiempo_max_ms = 1000;
+
+  while (millis() - tiempo_desde_inicio < tiempo_max_ms)
+  {
+    if (gpsSerial.available())
+    {
+      return true;
+    }
+    delay(10);
+  }
+  return false;
+}
+
+void conectar_wifi()
+{
+  WiFi.begin(ssid, password);
+
+  int intentos = 0;
+  while (WiFi.status() != WL_CONNECTED && intentos < 30)
+  {
+    delay(500);
+    indicador(0, 0);
+    intentos++;
+  }
+  if (WiFi.status() == WL_CONNECTED)
+  {
+
+    Serial.println("Wifi conectado");
+    indicador(2, 1);
+  }
+  else
+  {
+    Serial.println("la coneccion a wifi fallado");
+    indicador_fallo(5);
+  }
+}
+
+void mqtt_reconect()
+{
+
+  client.setServer(mqtt_server, mqtt_port);
+
+  int intentos = 0;
+  while (!client.connected() && intentos < 5)
+  {
+    intentos++;
+    Serial.println("Conectando al servidor mqtt");
+  }
+
+  if (client.connect("ESP32_principal", mqtt_user, mqtt_password))
+  {
+    Serial.println("esp conectado");
+
+    bool suscrito = client.subscribe(topic_sub);
+    if (suscrito)
+    {
+      Serial.println("suscrito a");
+      Serial.print(topic_sub);
+    }
+    else
+    {
+      Serial.println("error en la subscripcion");
+    }
+    indicador(3, 2);
+  }
+  else
+  {
+    Serial.println("no se ha podido conectar al servidor mqtt");
+    indicador_fallo(10);
+  }
+}
+
+void gps_coneccion()
+{
+  while (test_gps())
+  {
+    while (gpsSerial.available() > 0)
+    {
+      gps.encode(gpsSerial.read());
+    }
+  }
+}
+
+void callback(char *topic, byte *payload, unsigned int length)
+{
+  mensaje = "";
+
+  for (int i = 0; i < length; i++)
+  {
+    mensaje += (char)payload[i];
+  }
+
+  // control de los motores
   if (mensaje == "adelante")
   {
     motores_adelante();
@@ -119,6 +248,39 @@ void loop()
   {
     motores_detener();
   }
+}
+
+void envio_de_datos()
+{
+  //================== Creacion de un Json para enviar los datos ==================
+  StaticJsonDocument<200> doc;
+
+  // declaramos el dispositivo que esamos utilizando
+  doc["Dispositivo"] = "Esp32-1";
+
+  // declaracion de los sensores en el json para enviarlos al backend del sitio web
+  JsonObject sensoresObj = doc.createNestedObject("Sensores");
+  sensoresObj["temperatura"] = temperatura;
+  sensoresObj["pH"] = ph;
+  sensoresObj["turbidez"] = turbidez;
+
+  // declaramos los datos del gps en el json
+  JsonObject gpsObj = doc.createNestedObject("Gps");
+  gpsObj["latitud"] = latitud;
+  gpsObj["longitud"] = longitud;
+  gpsObj["altitud"] = altitud;
+  gpsObj["velocidad"] = velocidad;
+
+  // variables temporales para conseguir el tamaño del documento y otras cosas para enviarlo
+  char buffer[256];
+  size_t n = serializeJson(doc, buffer);
+
+  // envia por mqtt el json
+  client.publish(topic_sub, (uint8_t *)buffer, (unsigned int)n);
+}
+
+void debug_info()
+{
 
   Serial.println("la temperatura es: ");
   Serial.print(temperatura);
@@ -130,69 +292,4 @@ void loop()
   Serial.print(altitud);
   Serial.println("la velocidad es: ");
   Serial.print(velocidad);
-
-  delay(1000);
 }
-
-bool test_gps()
-{
-  unsigned long tiempo_desde_inicio = millis();
-  int tiempo_max_ms = 1000;
-
-  while (millis() - tiempo_desde_inicio < tiempo_max_ms)
-  {
-    if (gpsSerial.available()){
-      return true;
-    }
-    delay(10);
-  }
-  return false;
-}
-
-void conectar_wifi()
-{
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    indicador(0, 0);
-  }
-  indicador(2, 1);
-}
-
-void mqtt_reconect()
-{
-  client.setServer(mqtt_server, mqtt_port);
-  while (!client.connected())
-  {
-    if (client.connect("ESP32_principal", mqtt_user, mqtt_password))
-    {
-      indicador(3, 2);
-    }
-    else
-    {
-      indicador_fallo(10);
-    }
-  }
-}
-
-
-void gps_coneccion()
-{
-  while (test_gps())
-  {
-    while (gpsSerial.available() > 0)
-    {
-      gps.encode(gpsSerial.read());
-    }
-  }
-}
-
-void callback(char *topic, byte *payload, unsigned int length)  // length, no lenght
-{
-  mensaje = "";  
-  for (int i = 0; i < length; i++)  
-  {
-    mensaje += (char)payload[i];
-  }
-}
-

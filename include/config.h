@@ -8,13 +8,18 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include <Arduino.h>
+#include <WiFi.h>
+#include <PubSubClient.h>
+#include "funciones.h"
+
 // pines motores
 #define motor_derecha_1 27
 #define motor_derecha_2 26
 #define motor_derecha_velocidad 13
 
 #define motor_izquierda_1 33
-#define motor_izquierda_2 34
+#define motor_izquierda_2 25
 #define motor_izquierda_velocidad 14
 
 // sensores
@@ -39,6 +44,9 @@ extern const char *mqtt_server;
 extern const int mqtt_port;
 extern const char *mqtt_password;
 extern const char *mqtt_user;
+
+//constantes de los temas
+extern const char *topic_pub;
 extern const char *topic_sub;
 
 // set up del sensor de temperatura
@@ -68,5 +76,10 @@ extern float altitud;
 extern float ph;
 extern float turbidez;
 extern float temperatura;
+
+extern unsigned long ultimo_envio_mqtt;
+extern unsigned long ultimo_debug;
+extern const unsigned long intervalo_envio;     
+extern const unsigned long intervalo_debug; 
 
 #endif

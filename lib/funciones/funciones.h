@@ -1,9 +1,8 @@
 #ifndef FUNCIONES_H
 #define FUNCIONES_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <Arduino.h>
+#include "config.h"
 
 //control de los motores
 void motores_adelante();
@@ -21,10 +20,6 @@ float redondeo(float medicion);
 //para indicar mediante la luz
 void indicador(int cant, int vel);
 void indicador_fallo(int cant);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif
 

@@ -4,8 +4,8 @@
 #include <TinyGPSPlus.h>
 #include <math.h>
 
-#include "funciones.h"
 #include "config.h"
+#include "funciones.h"
 
 /*
  * Medidor de turbidez
@@ -20,7 +20,8 @@ float medicion_de_turbidez()
     float NTU = 0;
 
     // se convierte a voltaje para entenderlo mas facilmente
-    voltaje = analogRead(sensor_de_turbidez) * (3.3 / 4095.0);
+    voltaje = analogRead(sensor_de_turbidez);
+    delayMicroseconds(100);
 
     // repetimos 800 veces la medicion para tener el dato mas veridico posible
     for (int i = 0; i < 800; i++)
@@ -30,6 +31,8 @@ float medicion_de_turbidez()
 
     // Promedio de repetir la medicion
     voltaje /= 800;
+
+    voltaje = (voltaje / 4095.0) * 3.3;
     voltaje = redondeo(voltaje);
 
     // asignamos NTU
@@ -69,17 +72,32 @@ float redondeo(float medicion)
 float medicion_de_ph()
 {
 
-    float ph;
+    float voltaje = 0;
+
+    for (int i = 0; i < 20; i++)
+    {
+        voltaje = +analogRead(sensor_de_ph);
+        delay(10);
+    }
+
+    voltaje /= 20;
+
+    voltaje = (voltaje / 4095.0) * 3.3;
 
     // lee la entrada del sensor y la convierte a PH
-    ph = 4095.0 - (analogRead(sensor_de_ph) / 73.07);
+    float ph = 7.0 - ((voltaje - 1.65) / 0.18);
+
+    if (ph < 0)
+        ph = 0;
+    if (ph > 14)
+        ph = 14;
 
     return ph;
 }
 
 /*
- * Funcion para medir la temperatura, 
- * utiliza la libreria dallas temperatura y one wire 
+ * Funcion para medir la temperatura,
+ * utiliza la libreria dallas temperatura y one wire
  */
 
 float medicion_temperatura()
@@ -89,10 +107,16 @@ float medicion_temperatura()
     sensores.requestTemperatures();     // le indicamos a los senores que consigan la temperatura
     temp = sensores.getTempCByIndex(0); // conseguimos la temperatura en °C de los sensores
 
+    if (temp = DEVICE_DISCONNECTED_C)
+    {
+        Serial.println("sensor de temperatura desconectado");
+        return -999.0;
+    }
+
     return temp;
 }
 
-/* 
+/*
  * Seccion del los motores
  * aqui se prenden y se apagan los motores para dirigir el robot
  */
@@ -133,7 +157,8 @@ void motores_derecha()
     digitalWrite(motor_izquierda_2, HIGH);
 }
 
-void motores_detener(){
+void motores_detener()
+{
     // le decimos al motor derecho detenerse
     digitalWrite(motor_derecha_1, LOW);
     digitalWrite(motor_derecha_2, LOW);
@@ -154,7 +179,7 @@ void indicador(int cant, int vel)
 
     if (cant == 0 && vel == 0)
     {
-        goto permanente;
+        digitalWrite(led_interno, HIGH);
     }
 
     for (int i = 0; i < cant; i++)
@@ -165,9 +190,6 @@ void indicador(int cant, int vel)
         delay(vel);
     }
     delay(1000);
-
-permanente:
-    digitalWrite(led_interno, HIGH);
 }
 
 void indicador_fallo(int cant)
