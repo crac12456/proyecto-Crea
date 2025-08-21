@@ -20,11 +20,24 @@ void callback(char *topic, byte *payload, unsigned int lenght);
 void envio_de_datos();
 void debug_info();
 
-/*
- * Codigo principal del proyecto
- * todas las funciones se encuentran ordenas en sus respectivos archivos
- * el main se concentra en inicializar lo necesario y
- */
+
+/*////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ██████╗ ██████╗  ██████╗ ██╗   ██╗███████╗ ██████╗████████╗ ██████╗      ██████╗██████╗ ███████╗ █████╗  //   
+// ██╔══██╗██╔══██╗██╔═══██╗╚██╗ ██╔╝██╔════╝██╔════╝╚══██╔══╝██╔═══██╗    ██╔════╝██╔══██╗██╔════╝██╔══██╗ //   
+// ██████╔╝██████╔╝██║   ██║ ╚████╔╝ █████╗  ██║        ██║   ██║   ██║    ██║     ██████╔╝█████╗  ███████║ //   
+// ██╔═══╝ ██╔══██╗██║   ██║  ╚██╔╝  ██╔══╝  ██║        ██║   ██║   ██║    ██║     ██╔══██╗██╔══╝  ██╔══██║ //   
+// ██║     ██║  ██║╚██████╔╝   ██║   ███████╗╚██████╗   ██║   ╚██████╔╝    ╚██████╗██║  ██║███████╗██║  ██║ //  
+// ╚═╝     ╚═╝  ╚═╝ ╚═════╝    ╚═╝   ╚══════╝ ╚═════╝   ╚═╝    ╚═════╝      ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝ //  
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////// CODIGO DEL PROYECTO CREA /////////////////////////////////////////////
+/////////////////////////////// Unidad Educativa Particular Siete de Mayo ////////////////////////////////////
+//////////////////////////////////////////// 3ro BTU "A" /////////////////////////////////////////////////////
+////////////////////////////////// CODIGO CREADO POR: Eliel González /////////////////////////////////////////
+//////////////////////// Creado en: Visual Studio Code con la extencion Platformio ///////////////////////////
+///////////////////// Repositorio de Github: https://github.com/crac12456/proyecto-Crea //////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+
 
 void setup()
 {
@@ -51,7 +64,7 @@ void setup()
   pinMode(gps_RX, INPUT);
   pinMode(gps_TX, OUTPUT);
 
-  // ================== Set up de sensores, etc ==================
+  // ================== Set up de sensores y conecciones ==================
 
   client.setCallback(callback);
 
@@ -59,37 +72,44 @@ void setup()
   sensores.begin();
   gpsSerial.begin(gps_bauds, SERIAL_8N1, gps_RX, gps_TX);
 
-  // funcion en redes.h, conecta el esp32 con la red wifi
+  //conecta el esp32 con la red wifi
   conectar_wifi();
 
-  // funcion en redes.h, conecta el esp32 con el broker mqtt
+  //conecta el esp32 con el broker mqtt
   mqtt_reconect();
 
   // indicamos que el setup se termino correctamente
   indicador(1, 2);
 
+  //apag0 los motores por seguridad
   motores_detener();
 }
 
 void loop()
 {
+  // ================== Coneccion con las redes y broker ==================
 
+  // Se asegura de que este conectado al broker 
   if (!client.connected())
   {
     Serial.print("conectando a mqtt");
     mqtt_reconect();
   }
 
+  // Loop de envio de mensajes del mqtt 
   client.loop();
 
+  // se asegura de que el wifi este conectado y lo reconecta
   if (WiFi.status() != WL_CONNECTED)
   {
     Serial.print("Conecting wifi");
     conectar_wifi();
   }
 
+  // Funcion de coneccion con el gps 
   gps_coneccion();
 
+  // Declaracion de variables
   temperatura = medicion_temperatura();
   ph = medicion_de_ph();
   turbidez = medicion_de_turbidez();
@@ -97,11 +117,18 @@ void loop()
   // comproamo que el gps este conectado correctamente
   gps_coneccion();
 
-  static unsigned long ultimo_envio = 0;
-  if (millis() - ultimo_envio >= 2000)
+  // ================== Envio y recibo de datos ==================
+
+  // variables para verificacion 
+  static unsigned long ultimo_envio = 0; 
+  const int tiempo_maximo = 2000;
+
+  //comprovamos que se este enviando la informacion 
+  if (millis() - ultimo_envio >= tiempo_maximo)
   {
     ultimo_envio = millis();
 
+    //conseguimos los datos del gps si este esta disponible 
     if (gps.location.isValid())
     {
       latitud = gps.location.lat();
@@ -113,7 +140,7 @@ void loop()
       ph = medicion_de_ph();
       turbidez = medicion_de_turbidez();
 
-      envio_de_datos();
+      envio_de_datos(); //funcion que envia los datos por mqtt al backend
 
       digitalWrite(led_interno, !digitalRead(led_interno));
     }
@@ -123,18 +150,13 @@ void loop()
     }
   }
 
-  // para debuggin
-  Serial.println("la temperatura es: ");
-  Serial.print(temperatura);
-  Serial.println("la latitud es: ");
-  Serial.print(latitud);
-  Serial.println("la longitud es: ");
-  Serial.print(longitud);
-  Serial.println("la altitud es: ");
-  Serial.print(altitud);
-  Serial.println("la velocidad es: ");
-  Serial.print(velocidad);
+  //informacion para debuggin 
+  debug_info();
+
 }
+
+/*
+esto dejo de utilizarce, luego lo borro 
 
 bool test_gps()
 {
@@ -150,19 +172,25 @@ bool test_gps()
     delay(10);
   }
   return false;
-}
+}*/
 
+// ================== Coneccion con la red ==================
 void conectar_wifi()
 {
   WiFi.begin(ssid, password);
 
+  const int max_intentos = 30; 
   int intentos = 0;
-  while (WiFi.status() != WL_CONNECTED && intentos < 30)
+
+  //comprueba la cantidad de intentos de coneccion 
+  while (WiFi.status() != WL_CONNECTED && intentos < max_intentos)
   {
     delay(500);
     indicador(0, 0);
     intentos++;
   }
+
+  //indicador de coneccion
   if (WiFi.status() == WL_CONNECTED)
   {
 
@@ -176,11 +204,13 @@ void conectar_wifi()
   }
 }
 
+// ================== Coneccion con el broker mqtt ==================
 void mqtt_reconect()
 {
 
   client.setServer(mqtt_server, mqtt_port);
 
+  //comprueva la cantidad de intentos de conectarse
   int intentos = 0;
   while (!client.connected() && intentos < 5)
   {
@@ -188,11 +218,16 @@ void mqtt_reconect()
     Serial.println("Conectando al servidor mqtt");
   }
 
+  //si se ha conectado, se suscribe al broker 
   if (client.connect("ESP32_principal", mqtt_user, mqtt_password))
   {
     Serial.println("esp conectado");
 
     bool suscrito = client.subscribe(topic_sub);
+
+    // ================== Subscripcion al broker ==================
+
+    //comprueva que este suscrito al broker 
     if (suscrito)
     {
       Serial.println("suscrito a");
@@ -211,6 +246,7 @@ void mqtt_reconect()
   }
 }
 
+//se conecta con el gps y lee los datos 
 void gps_coneccion()
 {
   while (test_gps())
@@ -222,6 +258,7 @@ void gps_coneccion()
   }
 }
 
+//recibir los mensajes del broker 
 void callback(char *topic, byte *payload, unsigned int length)
 {
   mensaje = "";
@@ -231,7 +268,9 @@ void callback(char *topic, byte *payload, unsigned int length)
     mensaje += (char)payload[i];
   }
 
-  // control de los motores
+  //================== Control de los motores ==================
+
+  // despues de recibir los mensajtes, procesa la informacion para controlar los motores 
   if (mensaje == "adelante")
   {
     motores_adelante();
@@ -279,9 +318,9 @@ void envio_de_datos()
   client.publish(topic_sub, (uint8_t *)buffer, (unsigned int)n);
 }
 
+//funcion para debuggin 
 void debug_info()
 {
-
   Serial.println("la temperatura es: ");
   Serial.print(temperatura);
   Serial.println("la latitud es: ");

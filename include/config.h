@@ -1,17 +1,16 @@
-
-/*
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * * Header de configuracion, aqui se declaran las variables gobales que se usaran * *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- */
-
 #ifndef CONFIG_H
 #define CONFIG_H
+
+/////////////////////////////////////////////////////////////////////////////////////////
+///// Header de configuracion, aqui se declaran las variables gobales que se usaran /////
+/////////////////////////////////////////////////////////////////////////////////////////
 
 #include <Arduino.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include "funciones.h"
+
+// ================== Configuracion de los pines ==================
 
 // pines motores
 #define motor_derecha_1 27
@@ -34,6 +33,8 @@
 
 // leds
 #define led_interno 2
+
+// ================== Constantes Globales ==================
 
 // constantes globales para wifi
 extern const char *ssid;     // ingresar la web

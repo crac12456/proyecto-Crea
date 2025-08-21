@@ -7,32 +7,40 @@
 #include "config.h"
 #include "funciones.h"
 
-/*
- * Medidor de turbidez
- * el codigo toma el input del sensor de turvidez y lo convierte a voltaje y luego a NTU
- * o la "Unidad Nefelometrica de turbidez"
- */
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////// FUNCIONES DE LOS SENSORES /////////////////////////////////////////////
+////////////////////////// Aqui esta la programacion de los drivers de los sensores //////////////////////////
+////////////////// Las librerias se encuetran arriba, facilmenta accesibles desde platformIO /////////////////
+////////////////////////////////// estan programadas con sintaxis de C ///////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// variable para un mejor entendimiento 
+const float voltaje_del_esp = 3.3;
+const float lectura_analogica_max = 4095.0;
+
+// ================== Driver del sensor de Turbidez ==================
 
 float medicion_de_turbidez()
 {
 
     float voltaje = 0;
     float NTU = 0;
+    const int cant_de_lecturas = 800;
 
     // se convierte a voltaje para entenderlo mas facilmente
     voltaje = analogRead(sensor_de_turbidez);
     delayMicroseconds(100);
 
     // repetimos 800 veces la medicion para tener el dato mas veridico posible
-    for (int i = 0; i < 800; i++)
+    for (int i = 0; i < cant_de_lecturas; i++)
     {
-        voltaje += ((float)analogRead(sensor_de_turbidez) * (3.3 / 4095.0));
+        voltaje += ((float)analogRead(sensor_de_turbidez) * (voltaje_del_esp / lectura_analogica_max));
     }
 
     // Promedio de repetir la medicion
-    voltaje /= 800;
+    voltaje /= cant_de_lecturas;
 
-    voltaje = (voltaje / 4095.0) * 3.3;
+    voltaje = (voltaje / lectura_analogica_max) * voltaje_del_esp;
     voltaje = redondeo(voltaje);
 
     // asignamos NTU
@@ -64,41 +72,40 @@ float redondeo(float medicion)
     return medicion;
 }
 
-/*
- * Funcion que mide el ph, esta lee la entrada analogica del sensor y lo convierte a ph
- * luego regresa el ph
- */
+// ================== Driver del sensor de pH ==================
 
 float medicion_de_ph()
 {
 
     float voltaje = 0;
+    const int cantidad_de_lecturas = 20;
 
-    for (int i = 0; i < 20; i++)
+    for (int i = 0; i < cantidad_de_lecturas; i++)
     {
         voltaje = +analogRead(sensor_de_ph);
         delay(10);
     }
 
-    voltaje /= 20;
+    voltaje /= cantidad_de_lecturas;
 
-    voltaje = (voltaje / 4095.0) * 3.3;
+    voltaje = (voltaje / lectura_analogica_max) * voltaje_del_esp;
 
     // lee la entrada del sensor y la convierte a PH
     float ph = 7.0 - ((voltaje - 1.65) / 0.18);
 
     if (ph < 0)
+    {
         ph = 0;
+    }
     if (ph > 14)
+    {
         ph = 14;
+    }
 
     return ph;
 }
 
-/*
- * Funcion para medir la temperatura,
- * utiliza la libreria dallas temperatura y one wire
- */
+// ================== Driver del medidor de temperatura ==================
 
 float medicion_temperatura()
 {
@@ -116,62 +123,51 @@ float medicion_temperatura()
     return temp;
 }
 
-/*
- * Seccion del los motores
- * aqui se prenden y se apagan los motores para dirigir el robot
- */
+// ================== Controles de los motores ==================
 
-// seccion motores
+// Adelante 
 void motores_adelante()
 {
-
-    // le decimos al motor derecho acelerar
     digitalWrite(motor_derecha_1, HIGH);
     digitalWrite(motor_derecha_2, LOW);
 
-    // le decimos al motor izquierdo a acelerar
     digitalWrite(motor_izquierda_1, LOW);
     digitalWrite(motor_izquierda_2, HIGH);
 }
 
-void motores_izquierda()
-{
-
-    // le decimos al motor derecho acelerar
-    digitalWrite(motor_derecha_1, HIGH);
-    digitalWrite(motor_derecha_2, LOW);
-
-    // le decimos al motor izquierdo detenerse
-    digitalWrite(motor_izquierda_1, LOW);
-    digitalWrite(motor_izquierda_2, LOW);
-}
-
+// Derecha 
 void motores_derecha()
 {
-    // le decimos al motor derecho detenerse
     digitalWrite(motor_derecha_1, LOW);
     digitalWrite(motor_derecha_2, LOW);
 
-    // le decimos al motor derecho acelerar
     digitalWrite(motor_izquierda_1, LOW);
     digitalWrite(motor_izquierda_2, HIGH);
 }
 
-void motores_detener()
+// Izquierda
+void motores_izquierda()
 {
-    // le decimos al motor derecho detenerse
-    digitalWrite(motor_derecha_1, LOW);
+    digitalWrite(motor_derecha_1, HIGH);
     digitalWrite(motor_derecha_2, LOW);
 
-    // le decimos al motor derecho acelerar
     digitalWrite(motor_izquierda_1, LOW);
     digitalWrite(motor_izquierda_2, LOW);
 }
 
-/*
- * Funciones con los leds, utilizamos estas para comprovar que algo funcione, identificar errores, etc.
- */
+// Detener 
+void motores_detener()
+{
+    digitalWrite(motor_derecha_1, LOW);
+    digitalWrite(motor_derecha_2, LOW);
 
+    digitalWrite(motor_izquierda_1, LOW);
+    digitalWrite(motor_izquierda_2, LOW);
+}
+
+// ================== Indicadores de luz ==================
+
+// para indicar que halla cargado todo 
 void indicador(int cant, int vel)
 {
 
@@ -192,6 +188,7 @@ void indicador(int cant, int vel)
     delay(1000);
 }
 
+// Indicador de fallo 
 void indicador_fallo(int cant)
 {
 

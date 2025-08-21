@@ -8,6 +8,10 @@
 #include "config.h"
 #include "funciones.h"
 
+/////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////// Declaracion de variables globales del codigo //////////////////////////
+/////////////////////////// Tanto coneccion de redes como utilidades ////////////////////////////
+
 //inicializacion de variables del gps
 double latitud = 0;
 double longitud = 0;
@@ -52,6 +56,7 @@ String mensaje = "";
 unsigned long tiempo_desde_inicio = millis();
 int tiempo_max_ms = 1000;
 
+// variables para testing de las coneccions
 unsigned long ultimo_envio_mqtt = 0;
 unsigned long ultimo_debug = 0;
 const unsigned long intervalo_envio = 2000;     

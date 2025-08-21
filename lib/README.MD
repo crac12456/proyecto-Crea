@@ -1,13 +1,4 @@
-# FUNCIONES DEL PROYECTO
-
-## Funciones de motores
-
-para que el robot se mueva, tenemos 3 funciones para cada direccion, y en caso de que se este detenido, simplemente no se llamara a ninguna
-
-estas funciones tienen 2 partes, la del motor derecho y del motor izquierdo, utilizo un **digitalWrite**.
-esto le indica al controlador L982 en que dirreccion girara este motor
-para que valla hacia delante activo ambos al mismo tiempo en dirreciones contrarias
-para que valla a la izquierda desactivo el izquierdo y activo el derecho, para la derecha hago lo contrario
+# Driver y funciones del proyeto
 
 ## sensor de turbidez
 
@@ -24,6 +15,14 @@ Despues de eso asigno tengo un switch que revisa el voltaje y le asigna el NTU c
 
 En caso de que no sea asi, esta leera el voltaje y lo convertira en NTU
 
+## sensor de PH
+
+El ph es la cantidad de particulas de hidrogeno en un liquido o sustancia,
+es una nidad logaritmica que muestra la acides o basicidad de un liquido
+
+en la programacion, primero se leen 20 veces el sensor para luego redondearlo, obetiendo una medicion mas fiable
+Convertimos el valor analogico a ph y nos aseguramos de que la medicion sea correcta
+
 ## Sensor de temperatura
 
 El sensor de temperatura DS18B20 utiliza un protocolo one wire, el cual permite enviar y recibir informacion mediante un cable
@@ -37,12 +36,17 @@ Estas funciones son:
 - **sensors.recuestTemperatures()**: esta funcion indica a los sensores que empiezen a funcionar
 - **sensors.getTempXVyIndex(pin)**: esta funcion consigue la temperatura del sensor en °C, la almacenamos en una variable
 
-## sensor de PH
+Aparte de esto, el codigo tiene un bucle if el cual comprueba que el sensor funcione correctamente
 
-El ph es la medicion de la asides del agua
-en este caso, la programacion es bastante sencilla para, simplemente leemos la entrada del pin al que eswte conectado y lo convertimos, teniendo en cuenta la conversion que tenemos que hacer
+## Funciones de motores
 
-## GPS
+para que el robot se mueva, tenemos 3 funciones para cada direccion, y en caso de que se este detenido, simplemente no se llamara a ninguna
 
-Para medir el gps primero creamos una variable **millis** esta la usamos para medir la cantidad de tiempo desde que se inicio el microcontrolador
-basandonos en este tiempo verificamos si se ha podido conectar correctamente el GPS
+estas funciones tienen 2 partes, la del motor derecho y del motor izquierdo, utilizo un **digitalWrite**.
+esto le indica al controlador L982 en que dirreccion girara este motor
+para que valla hacia delante activo ambos al mismo tiempo en dirreciones contrarias
+para que valla a la izquierda desactivo el izquierdo y activo el derecho, para la derecha hago lo contrario
+
+## Funciones de los leds
+
+funciones para comprovar que todo funcione correctamente, mostrar que este transcurriendo correcamente el set up o mostrar un fallo
