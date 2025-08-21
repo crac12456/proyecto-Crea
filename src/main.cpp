@@ -294,19 +294,19 @@ void callback(char *topic, byte *payload, unsigned int length)
 void envio_de_datos()
 {
   //================== Creacion de un Json para enviar los datos ==================
-  StaticJsonDocument<200> doc;
+  StaticJsonDocument<256> doc; // Aumenté un poco por los objetos anidados
 
-  // declaramos el dispositivo que esamos utilizando
+  // Información del dispositivo
   doc["Dispositivo"] = "Esp32-1";
 
-  // declaracion de los sensores en el json para enviarlos al backend del sitio web
-  JsonObject sensoresObj = doc.createNestedObject("Sensores");
+  // Sensores
+  JsonObject sensoresObj = doc["Sensores"].to<JsonObject>();
   sensoresObj["temperatura"] = temperatura;
   sensoresObj["pH"] = ph;
   sensoresObj["turbidez"] = turbidez;
 
-  // declaramos los datos del gps en el json
-  JsonObject gpsObj = doc.createNestedObject("Gps");
+  // GPS
+  JsonObject gpsObj = doc["Gps"].to<JsonObject>();
   gpsObj["latitud"] = latitud;
   gpsObj["longitud"] = longitud;
   gpsObj["altitud"] = altitud;

@@ -8,7 +8,10 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
-#include "funciones.h"
+#include <OneWire.h>
+#include <DallasTemperature.h>
+#include <TinyGPSPlus.h>
+#include <HardwareSerial.h>
 
 // ================== Configuracion de los pines ==================
 

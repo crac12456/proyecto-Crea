@@ -4,8 +4,8 @@
 #include <TinyGPSPlus.h>
 #include <math.h>
 
-#include "config.h"
 #include "funciones.h"
+#include "config.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////// FUNCIONES DE LOS SENSORES /////////////////////////////////////////////
@@ -114,7 +114,7 @@ float medicion_temperatura()
     sensores.requestTemperatures();     // le indicamos a los senores que consigan la temperatura
     temp = sensores.getTempCByIndex(0); // conseguimos la temperatura en °C de los sensores
 
-    if (temp = DEVICE_DISCONNECTED_C)
+    if (temp == DEVICE_DISCONNECTED_C)
     {
         Serial.println("sensor de temperatura desconectado");
         return -999.0;

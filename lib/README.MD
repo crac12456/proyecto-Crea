@@ -1,6 +1,6 @@
 # Driver y funciones del proyeto
 
-## sensor de turbidez
+## Sensor de turbidez
 
 en esta funcion tengo 2 parametros, una variable NTU (unidad nefelométrica de turbidez)
 y el pin utilizado (posiblemente lo borre)
@@ -15,7 +15,7 @@ Despues de eso asigno tengo un switch que revisa el voltaje y le asigna el NTU c
 
 En caso de que no sea asi, esta leera el voltaje y lo convertira en NTU
 
-## sensor de PH
+## Sensor de PH
 
 El ph es la cantidad de particulas de hidrogeno en un liquido o sustancia,
 es una nidad logaritmica que muestra la acides o basicidad de un liquido

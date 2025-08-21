@@ -2,7 +2,6 @@
 #define FUNCIONES_H
 
 #include <Arduino.h>
-#include "config.h"
 
 //control de los motores
 void motores_adelante();
