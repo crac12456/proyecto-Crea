@@ -3,22 +3,24 @@
 
 #include <Arduino.h>
 
-//control de los motores
+// Control de los motores
 void motores_adelante();
 void motores_izquierda();
 void motores_derecha();
 void motores_detener();
 
-//sensores
+// Sensores
 float medicion_de_turbidez(); 
 float medicion_de_ph();
 float medicion_temperatura();
 
 float redondeo(float medicion);
 
-//para indicar mediante la luz
+// Para indicar mediante la luz
 void indicador(int cant, int vel);
 void indicador_fallo(int cant);
+
+bool test_gps();
 
 #endif
 

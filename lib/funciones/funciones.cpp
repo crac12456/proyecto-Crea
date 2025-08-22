@@ -1,4 +1,6 @@
 #include <Arduino.h>
+#include <PubSubClient.h>
+#include <WiFi.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <TinyGPSPlus.h>
@@ -14,7 +16,7 @@
 ////////////////////////////////// estan programadas con sintaxis de C ///////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// variable para un mejor entendimiento 
+// Variable para un mejor entendimiento 
 const float voltaje_del_esp = 3.3;
 const float lectura_analogica_max = 4095.0;
 
@@ -27,11 +29,11 @@ float medicion_de_turbidez()
     float NTU = 0;
     const int cant_de_lecturas = 800;
 
-    // se convierte a voltaje para entenderlo mas facilmente
+    // Se convierte a voltaje para entenderlo mas facilmente
     voltaje = analogRead(sensor_de_turbidez);
     delayMicroseconds(100);
 
-    // repetimos 800 veces la medicion para tener el dato mas veridico posible
+    // Repetimos 800 veces la medicion para tener el dato mas veridico posible
     for (int i = 0; i < cant_de_lecturas; i++)
     {
         voltaje += ((float)analogRead(sensor_de_turbidez) * (voltaje_del_esp / lectura_analogica_max));
@@ -43,7 +45,7 @@ float medicion_de_turbidez()
     voltaje = (voltaje / lectura_analogica_max) * voltaje_del_esp;
     voltaje = redondeo(voltaje);
 
-    // asignamos NTU
+    // Asignamos NTU
     if (voltaje < 2.5)
     {
         // NTU maximo
@@ -57,7 +59,7 @@ float medicion_de_turbidez()
     }
     else
     {
-        // calcula el NTU si no es el maximo o minimo
+        // Calcula el NTU si no es el maximo o minimo
         NTU = -1120.4 * sqrt(voltaje) + 5742.3 * voltaje - 4353.8;
     }
 
@@ -111,8 +113,8 @@ float medicion_temperatura()
 {
     float temp;
 
-    sensores.requestTemperatures();     // le indicamos a los senores que consigan la temperatura
-    temp = sensores.getTempCByIndex(0); // conseguimos la temperatura en °C de los sensores
+    sensores.requestTemperatures();     // Le indicamos a los senores que consigan la temperatura
+    temp = sensores.getTempCByIndex(0); // Conseguimos la temperatura en °C de los sensores
 
     if (temp == DEVICE_DISCONNECTED_C)
     {
@@ -167,7 +169,7 @@ void motores_detener()
 
 // ================== Indicadores de luz ==================
 
-// para indicar que halla cargado todo 
+// Para indicar que halla cargado todo 
 void indicador(int cant, int vel)
 {
 
@@ -188,7 +190,7 @@ void indicador(int cant, int vel)
     delay(1000);
 }
 
-// Indicador de fallo 
+// Indicador de fallos
 void indicador_fallo(int cant)
 {
 
@@ -207,4 +209,9 @@ void indicador_fallo(int cant)
         digitalWrite(led_interno, LOW);
         delay(100);
     }
+}
+
+bool test_gps()
+{
+    return gpsSerial.available() > 0;
 }
