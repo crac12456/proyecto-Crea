@@ -33,6 +33,7 @@
  - Creado por: Eliel González
  - Creado en: VS Code con platformio
  - Github: https://github.com/crac12456/proyecto-Crea 
+ - Pagina Web: https://github.com/crac12456/ProyectoCREA-web.git
 
 =======================================================================*/
 
@@ -59,13 +60,16 @@ void gps_coneccion();
 void callback(char *topic, byte *payload, unsigned int lenght);
 void envio_de_datos();
 void debug_info();
+void test_motores();
 
 // ================== Set up del proyecto ==================
 
 void setup()
 {
   Serial.begin(115200); //Inicio de la comunicacion por el terminal
-  Serial.println("debug");
+  Serial.println("================== Proyecto Crea ==================");
+  Serial.println(" Debuggin ");
+  Serial.println("================================ ==================");
 
   // ================== Set up de los pines ==================
 
@@ -73,10 +77,10 @@ void setup()
   pinMode(led_interno, OUTPUT);
 
   // Motores
-  pinMode(motor_derecha_1, OUTPUT);
+  pinMode(motor_derecha_1, OUTPUT); // Derecho
   pinMode(motor_derecha_2, OUTPUT);
 
-  pinMode(motor_izquierda_1, OUTPUT);
+  pinMode(motor_izquierda_1, OUTPUT); // Izquierdo 
   pinMode(motor_izquierda_2, OUTPUT);
 
   // Sensores
@@ -107,6 +111,7 @@ void setup()
 
   //Apago los motores por seguridad
   motores_detener();
+  test_motores();
 }
 
 // ================== Loop prinicpal del proyecto ==================
@@ -115,8 +120,8 @@ void loop()
 {
   // ================== Conexión con las redes y broker ==================
 
-  // Se asegura de que este conectado al broker 
-  if (!client.connected())
+  // verifica que este conectado al broker
+  if (!client.connected()) 
   {
     Serial.print("conectando a mqtt");
     mqtt_reconect();
@@ -125,14 +130,14 @@ void loop()
   // Loop de envio de mensajes del mqtt 
   client.loop();
 
-  // Se asegura de que el wifi este conectado y lo reconecta
+  // Verifica la coneccion con el wifi y lo reconecta de ser necesario
   if (WiFi.status() != WL_CONNECTED)
   {
-    Serial.print("Conecting wifi");
+    Serial.print("Conecting to Wifi");
     conectar_wifi();
   }
 
-  // Función de coneccion con el gps 
+  // Coneccion con el gps 
   gps_coneccion();
 
   // Declaración de variables
@@ -140,16 +145,13 @@ void loop()
   ph = medicion_de_ph();
   turbidez = medicion_de_turbidez();
 
-  // Comprobamos que el GPS se encuentre conectado correctamente
-  gps_coneccion();
-
   // ================== Envio y recibo de datos ==================
 
   // Variables para verificacion 
   static unsigned long ultimo_envio = 0; 
   const int tiempo_maximo = 2000;
 
-  // Comprobamos que se este enviando la informacion 
+  // Si se estan enviando los datos, consegue los datos del gps
   if (millis() - ultimo_envio >= tiempo_maximo)
   {
     ultimo_envio = millis();
@@ -172,13 +174,14 @@ void loop()
     }
   }
 
-  // Informacion para debuggin 
+  // debug
   test_motores();
 }
 
 // ================== Conexión con la red ==================
 void conectar_wifi()
 {
+  // Set up necesario para empezar la coneccion 
   WiFi.disconnect(true);  
   WiFi.mode(WIFI_STA);    
   WiFi.begin(ssid, password);
@@ -187,7 +190,8 @@ void conectar_wifi()
   int intentos = 0;
 
   Serial.print("Conectando: ");
-  // Comprueba la cantidad de intentos de coneccion 
+
+  // Verifica la cantidad de intentos de conectarse con la red
   while (WiFi.status() != WL_CONNECTED && intentos < max_intentos)
   {
     delay(500);
@@ -196,11 +200,9 @@ void conectar_wifi()
     intentos++;
   }
 
-  //indicador de coneccion
   if (WiFi.status() == WL_CONNECTED)
   {
-
-    Serial.println("Wifi conectado");
+    Serial.println("\nWifi conectado");
     indicador(2, 1);
   }
   else
@@ -214,40 +216,41 @@ void conectar_wifi()
 void mqtt_reconect()
 {
 
+  // Set up de la coneccion
   client.setServer(mqtt_server, mqtt_port);
 
-  // Comprueva la cantidad de intentos de conectarse
+  // Verifica la cantidad de intentos para realizar la coneccion
   int intentos = 0;
+  Serial.println("Conectando al servidor mqtt");
   while (!client.connected() && intentos < 5)
   {
+    Serial.println(" . ");
     intentos++;
-    Serial.println("Conectando al servidor mqtt");
   }
 
   // Si se ha conectado, se suscribe al broker 
-  if (client.connect("ESP32_principal", mqtt_user, mqtt_password))
+  if (client.connect(mqtt_id, mqtt_user, mqtt_password))
   {
-    Serial.println("esp conectado");
+    Serial.println("\nEsp32 conectado al broker");
 
+    // Se subscribe al broker 
     bool suscrito = client.subscribe(topic_sub);
-
-    // ================== Subscripcion al broker ==================
 
     // Comprueva que este suscrito al broker 
     if (suscrito)
     {
-      Serial.println("suscrito a");
+      Serial.println("suscrito a: ");
       Serial.print(topic_sub);
     }
     else
     {
-      Serial.println("error en la subscripcion");
+      Serial.println("\nerror en la subscripcion");
     }
     indicador(3, 2);
   }
   else
   {
-    Serial.println("no se ha podido conectar al servidor mqtt");
+    Serial.println("\nno se ha podido conectar al servidor mqtt");
     indicador_fallo(10);
   }
 }
@@ -276,7 +279,7 @@ void callback(char *topic, byte *payload, unsigned int length)
 
   //================== Control de los motores ==================
 
-  // Despues de recibir los mensajtes, procesa la informacion para controlar los motores 
+  // Procesa la informacion del mensaje para controlar los motores 
   if (mensaje == "adelante")
   {
     motores_adelante();
@@ -298,33 +301,31 @@ void callback(char *topic, byte *payload, unsigned int length)
 void envio_de_datos()
 {
   //================== Creacion de un Json para enviar los datos ==================
-  JsonDocument doc; // Aumenté un poco por los objetos anidados
+  JsonDocument doc; 
 
   // Información del dispositivo
   doc["Dispositivo"] = "Esp32-1";
 
   // Sensores
-  JsonObject sensoresObj = doc["Sensores"].to<JsonObject>();
-  sensoresObj["temperatura"] = temperatura;
-  sensoresObj["pH"] = ph;
-  sensoresObj["turbidez"] = turbidez;
+  doc["temperatura"] = temperatura;
+  doc["pH"] = ph;
+  doc["turbidez"] = turbidez;
 
   // GPS
-  JsonObject gpsObj = doc["Gps"].to<JsonObject>();
-  gpsObj["latitud"] = latitud;
-  gpsObj["longitud"] = longitud;
-  gpsObj["altitud"] = altitud;
-  gpsObj["velocidad"] = velocidad;
+  doc["latitud"] = latitud;
+  doc["longitud"] = longitud;
+  doc["altitud"] = altitud;
+  doc["velocidad"] = velocidad;
 
-  // Variables temporales para conseguir el tamaño del documento y otras cosas para enviarlo
+  // Envio del documentos Json 
   char buffer[256];
   size_t n = serializeJson(doc, buffer);
 
-  // Envia por mqtt el json
   client.publish(topic_sub, (uint8_t *)buffer, (unsigned int)n);
 }
 
-// Funcion para debuggin 
+// ================== Debugging ==================
+
 void debug_info()
 {
   Serial.println("la temperatura es: ");
@@ -337,6 +338,7 @@ void debug_info()
   Serial.print(altitud);
   Serial.println("la velocidad es: ");
   Serial.print(velocidad);
+  delay(1000);
 }
 
 void test_motores() {
@@ -349,7 +351,7 @@ void test_motores() {
   Serial.println("Izquierda");
   motores_izquierda();
   delay(100);
-  Serial.println("Detner");
+  Serial.println("Detener");
   motores_izquierda();
   delay(100);
 }

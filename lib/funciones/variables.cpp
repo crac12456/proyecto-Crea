@@ -5,13 +5,18 @@
 #include <HardwareSerial.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
+#include <random.h>
 
 #include "config.h"
 #include "funciones.h"
 
-/////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////// Declaracion de variables globales del codigo //////////////////////////
-/////////////////////////// Tanto coneccion de redes como utilidades ////////////////////////////
+/*========================= Variables globales =========================
+
+    estas son las variables que se utilizar en todo el codigo,
+    principalmente cosas relacionadas con las conecciones tanto wifi 
+    asi como constructures de las librerias 
+
+=======================================================================*/
 
 //Inicializacion de variables del gps
 double latitud = 0;
@@ -32,12 +37,13 @@ const char *password = "12345678"; // ingresar contraseña
 // Constantes de la coneccion con mqt
 const char *mqtt_server = "broker.hivemq.com";
 const int mqtt_port = 1883;
-const char *mqtt_password = "password";
-const char *mqtt_user = "esp_1_user";
+const char *mqtt_password = "proyectoCREA";
+const char *mqtt_user = "Esp32_robot";
+const byte *mqtt_id = random(250);
 
 //Temas para el envio e ingreso de datos 
-const char *topic_pub = "esp32/control";
-const char *topic_sub = "esp32/sensores";
+const char *topic_pub = "esp32/robot/control";
+const char *topic_sub = "esp32/robot/sensores";
 
 // Set up del sensor de temperatura
 OneWire sensor_de_temperatura(sensor_de_temp);

@@ -48,6 +48,7 @@ extern const char *mqtt_server;
 extern const int mqtt_port;
 extern const char *mqtt_password;
 extern const char *mqtt_user;
+extern const byte *mqtt_id;
 
 // Constantes de los temas
 extern const char *topic_pub;
