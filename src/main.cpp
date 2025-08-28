@@ -29,11 +29,11 @@
 ====================== INFORMACION DEL PROYECTO =======================
 
  - Unidad Educativa Particular "Siete de Mayo"
- - 3ro BTU "A"
+ - 3ro de Bachillerato Técnico Unificado - Paralelo "A"
  - Creado por: Eliel González
- - Creado en: VS Code con platformio
- - Github: https://github.com/crac12456/proyecto-Crea 
- - Pagina Web: https://github.com/crac12456/ProyectoCREA-web.git
+ - Creado en: Visual Studio Code con platformio
+ - Github (Código): https://github.com/crac12456/proyecto-Crea 
+ - Github (Sitio Web): https://github.com/crac12456/ProyectoCREA-web.git
 
 =======================================================================*/
 
@@ -69,7 +69,7 @@ void setup()
   Serial.begin(115200); //Inicio de la comunicacion por el terminal
   Serial.println("================== Proyecto Crea ==================");
   Serial.println(" Debuggin ");
-  Serial.println("================================ ==================");
+  Serial.println("===================================================");
 
   // ================== Set up de los pines ==================
 
@@ -120,7 +120,7 @@ void loop()
 {
   // ================== Conexión con las redes y broker ==================
 
-  // verifica que este conectado al broker
+  // Verifica que este conectado al broker
   if (!client.connected()) 
   {
     Serial.print("conectando a mqtt");
@@ -130,14 +130,14 @@ void loop()
   // Loop de envio de mensajes del mqtt 
   client.loop();
 
-  // Verifica la coneccion con el wifi y lo reconecta de ser necesario
+  // Verifica la conexión con el wifi y lo reconecta de ser necesario
   if (WiFi.status() != WL_CONNECTED)
   {
     Serial.print("Conecting to Wifi");
     conectar_wifi();
   }
 
-  // Coneccion con el gps 
+  // Coneccion con el GPS
   gps_coneccion();
 
   // Declaración de variables
@@ -147,16 +147,16 @@ void loop()
 
   // ================== Envio y recibo de datos ==================
 
-  // Variables para verificacion 
+  // Variables para verificación 
   static unsigned long ultimo_envio = 0; 
   const int tiempo_maximo = 2000;
 
-  // Si se estan enviando los datos, consegue los datos del gps
+  // Si se estan enviando los datos, consegue los datos del GPS
   if (millis() - ultimo_envio >= tiempo_maximo)
   {
     ultimo_envio = millis();
 
-    // Conseguimos los datos del gps si este esta disponible 
+    // Conseguimos los datos del GPS si este esta disponible 
     if (gps.location.isValid())
     {
       latitud = gps.location.lat();
@@ -164,7 +164,7 @@ void loop()
       altitud = gps.altitude.meters();
       velocidad = gps.speed.kmph();
 
-      envio_de_datos(); // Funcion que envia los datos por mqtt al backend
+      envio_de_datos(); // Función que envia los datos por mqtt al backend
 
       digitalWrite(led_interno, !digitalRead(led_interno));
     }
@@ -181,7 +181,7 @@ void loop()
 // ================== Conexión con la red ==================
 void conectar_wifi()
 {
-  // Set up necesario para empezar la coneccion 
+  // Set up necesario para empezar la conexión 
   WiFi.disconnect(true);  
   WiFi.mode(WIFI_STA);    
   WiFi.begin(ssid, password);
@@ -216,10 +216,10 @@ void conectar_wifi()
 void mqtt_reconect()
 {
 
-  // Set up de la coneccion
+  // Set up de la conexión
   client.setServer(mqtt_server, mqtt_port);
 
-  // Verifica la cantidad de intentos para realizar la coneccion
+  // Verifica la cantidad de intentos para realizar la conexión
   int intentos = 0;
   Serial.println("Conectando al servidor mqtt");
   while (!client.connected() && intentos < 5)
@@ -236,7 +236,7 @@ void mqtt_reconect()
     // Se subscribe al broker 
     bool suscrito = client.subscribe(topic_sub);
 
-    // Comprueva que este suscrito al broker 
+    // Comprueba que este suscrito al broker 
     if (suscrito)
     {
       Serial.println("suscrito a: ");
@@ -255,7 +255,7 @@ void mqtt_reconect()
   }
 }
 
-// Se conecta con el gps y lee los datos 
+// Se conecta con el GPS y lee los datos 
 void gps_coneccion()
 {
   while (gpsSerial.available() > 0)
@@ -279,7 +279,7 @@ void callback(char *topic, byte *payload, unsigned int length)
 
   //================== Control de los motores ==================
 
-  // Procesa la informacion del mensaje para controlar los motores 
+  // Procesa la información del mensaje para controlar los motores 
   if (mensaje == "adelante")
   {
     motores_adelante();
@@ -328,15 +328,15 @@ void envio_de_datos()
 
 void debug_info()
 {
-  Serial.println("la temperatura es: ");
+  Serial.println("La temperatura es: ");
   Serial.print(temperatura);
-  Serial.println("la latitud es: ");
+  Serial.println("La latitud es: ");
   Serial.print(latitud);
-  Serial.println("la longitud es: ");
+  Serial.println("La longitud es: ");
   Serial.print(longitud);
-  Serial.println("la altitud es: ");
+  Serial.println("La altitud es: ");
   Serial.print(altitud);
-  Serial.println("la velocidad es: ");
+  Serial.println("La velocidad es: ");
   Serial.print(velocidad);
   delay(1000);
 }

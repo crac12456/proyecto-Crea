@@ -9,12 +9,13 @@
 #include "funciones.h"
 #include "config.h"
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////// FUNCIONES DE LOS SENSORES /////////////////////////////////////////////
-////////////////////////// Aqui esta la programacion de los drivers de los sensores //////////////////////////
-////////////////// Las librerias se encuetran arriba, facilmenta accesibles desde platformIO /////////////////
-////////////////////////////////// estan programadas con sintaxis de C ///////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*==================== Funciones de los sensores  ======================
+
+    Aqui esta la programacion de los drivers de los sensores
+    Las librerias se encuetran arriba, accesibles desde platformIO
+    estan programadas con sintaxis de C
+
+=======================================================================*/
 
 // Variable para un mejor entendimiento 
 const float voltaje_del_esp = 3.3;
@@ -92,7 +93,7 @@ float medicion_de_ph()
 
     voltaje = (voltaje / lectura_analogica_max) * voltaje_del_esp;
 
-    // lee la entrada del sensor y la convierte a PH
+    // lee la entrada del sensor y la convierte a pH
     float ph = 7.0 - ((voltaje - 1.65) / 0.18);
 
     if (ph < 0)
@@ -169,7 +170,7 @@ void motores_detener()
 
 // ================== Indicadores de luz ==================
 
-// Para indicar que halla cargado todo 
+// Para indicar que haya cargado todo 
 void indicador(int cant, int vel)
 {
 
@@ -193,7 +194,6 @@ void indicador(int cant, int vel)
 // Indicador de fallos
 void indicador_fallo(int cant)
 {
-
     for (int i = 0; i <= cant; i++)
     {
         digitalWrite(led_interno, HIGH);
