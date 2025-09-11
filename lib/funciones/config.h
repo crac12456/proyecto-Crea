@@ -48,7 +48,14 @@ extern const char *mqtt_server;
 extern const int mqtt_port;
 extern const char *mqtt_password;
 extern const char *mqtt_user;
-extern const byte *mqtt_id;
+extern const char *mqtt_id;
+
+// Informacion para el envio de datos por HTTP
+extern const char *server = "";
+extern const String *api_key = "";
+
+extern WiFiClient client_WiFi;
+extern HTTPClient http;
 
 // Constantes de los temas
 extern const char *topic_pub;
@@ -86,5 +93,6 @@ extern unsigned long ultimo_envio_mqtt;
 extern unsigned long ultimo_debug;
 extern const unsigned long intervalo_envio;     
 extern const unsigned long intervalo_debug; 
+bool subscrito;
 
 #endif

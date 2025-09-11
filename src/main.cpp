@@ -1,22 +1,22 @@
 /*=======================================================================
-  /$$$$$$                                      /$$                  
- /$$__  $$                                    | $$                  
-| $$  \__/ /$$$$$$/$$$$   /$$$$$$   /$$$$$$  /$$$$$$                
-|  $$$$$$ | $$_  $$_  $$ |____  $$ /$$__  $$|_  $$_/                
- \____  $$| $$ \ $$ \ $$  /$$$$$$$| $$  \__/  | $$                  
- /$$  \ $$| $$ | $$ | $$ /$$__  $$| $$        | $$ /$$              
-|  $$$$$$/| $$ | $$ | $$|  $$$$$$$| $$        |  $$$$/              
- \______/ |__/ |__/ |__/ \_______/|__/         \___/                                                                                    
-                                                                    
- /$$$$$$$  /$$                                                      
-| $$__  $$| $$                                                      
-| $$  \ $$| $$ /$$   /$$  /$$$$$$                                   
-| $$$$$$$ | $$| $$  | $$ /$$__  $$                                  
-| $$__  $$| $$| $$  | $$| $$$$$$$$                                  
-| $$  \ $$| $$| $$  | $$| $$_____/                                  
-| $$$$$$$/| $$|  $$$$$$/|  $$$$$$$                                  
-|_______/ |__/ \______/  \_______/                                  
-                                                                    
+  /$$$$$$                                      /$$
+ /$$__  $$                                    | $$
+| $$  \__/ /$$$$$$/$$$$   /$$$$$$   /$$$$$$  /$$$$$$
+|  $$$$$$ | $$_  $$_  $$ |____  $$ /$$__  $$|_  $$_/
+ \____  $$| $$ \ $$ \ $$  /$$$$$$$| $$  \__/  | $$
+ /$$  \ $$| $$ | $$ | $$ /$$__  $$| $$        | $$ /$$
+|  $$$$$$/| $$ | $$ | $$|  $$$$$$$| $$        |  $$$$/
+ \______/ |__/ |__/ |__/ \_______/|__/         \___/
+
+ /$$$$$$$  /$$
+| $$__  $$| $$
+| $$  \ $$| $$ /$$   /$$  /$$$$$$
+| $$$$$$$ | $$| $$  | $$ /$$__  $$
+| $$__  $$| $$| $$  | $$| $$$$$$$$
+| $$  \ $$| $$| $$  | $$| $$_____/
+| $$$$$$$/| $$|  $$$$$$/|  $$$$$$$
+|_______/ |__/ \______/  \_______/
+
   /$$$$$$                        /$$     /$$                     /$$
  /$$__  $$                      | $$    |__/                    | $$
 | $$  \__/  /$$$$$$  /$$$$$$$  /$$$$$$   /$$ /$$$$$$$   /$$$$$$ | $$
@@ -32,7 +32,7 @@
  - 3ro de Bachillerato Técnico Unificado - Paralelo "A"
  - Creado por: Eliel González
  - Creado en: Visual Studio Code con platformio
- - Github (Código): https://github.com/crac12456/proyecto-Crea 
+ - Github (Código): https://github.com/crac12456/proyecto-Crea
  - Github (Sitio Web): https://github.com/crac12456/ProyectoCREA-web.git
 
 =======================================================================*/
@@ -48,6 +48,9 @@
 #include <SPI.h>
 #include <WiFi.h>
 #include <ArduinoJson.h>
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include <stdbool.h>
 
 #include "funciones.h"
 #include "config.h"
@@ -66,7 +69,7 @@ void test_motores();
 
 void setup()
 {
-  Serial.begin(115200); //Inicio de la comunicacion por el terminal
+  Serial.begin(115200); // Inicio de la comunicacion por el terminal
   Serial.println("================== Proyecto Crea ==================");
   Serial.println(" Debuggin ");
   Serial.println("===================================================");
@@ -80,7 +83,7 @@ void setup()
   pinMode(motor_derecha_1, OUTPUT); // Derecho
   pinMode(motor_derecha_2, OUTPUT);
 
-  pinMode(motor_izquierda_1, OUTPUT); // Izquierdo 
+  pinMode(motor_izquierda_1, OUTPUT); // Izquierdo
   pinMode(motor_izquierda_2, OUTPUT);
 
   // Sensores
@@ -109,7 +112,7 @@ void setup()
   // Indicamos que el setup se termino correctamente
   indicador(1, 2);
 
-  //Apago los motores por seguridad
+  // Apago los motores por seguridad
   motores_detener();
   test_motores();
 }
@@ -121,13 +124,13 @@ void loop()
   // ================== Conexión con las redes y broker ==================
 
   // Verifica que este conectado al broker
-  if (!client.connected()) 
+  if (!client.connected())
   {
     Serial.print("conectando a mqtt");
     mqtt_reconect();
   }
 
-  // Loop de envio de mensajes del mqtt 
+  // Loop de envio de mensajes del mqtt
   client.loop();
 
   // Verifica la conexión con el wifi y lo reconecta de ser necesario
@@ -147,8 +150,8 @@ void loop()
 
   // ================== Envio y recibo de datos ==================
 
-  // Variables para verificación 
-  static unsigned long ultimo_envio = 0; 
+  // Variables para verificación
+  static unsigned long ultimo_envio = 0;
   const int tiempo_maximo = 2000;
 
   // Si se estan enviando los datos, consegue los datos del GPS
@@ -156,7 +159,7 @@ void loop()
   {
     ultimo_envio = millis();
 
-    // Conseguimos los datos del GPS si este esta disponible 
+    // Conseguimos los datos del GPS si este esta disponible
     if (gps.location.isValid())
     {
       latitud = gps.location.lat();
@@ -181,12 +184,12 @@ void loop()
 // ================== Conexión con la red ==================
 void conectar_wifi()
 {
-  // Set up necesario para empezar la conexión 
-  WiFi.disconnect(true);  
-  WiFi.mode(WIFI_STA);    
+  // Set up necesario para empezar la conexión
+  WiFi.disconnect(true);
+  WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
 
-  const int max_intentos = 30; 
+  const int max_intentos = 30;
   int intentos = 0;
 
   Serial.print("Conectando: ");
@@ -215,7 +218,6 @@ void conectar_wifi()
 // ================== Conexión con el broker mqtt ==================
 void mqtt_reconect()
 {
-
   // Set up de la conexión
   client.setServer(mqtt_server, mqtt_port);
 
@@ -224,19 +226,19 @@ void mqtt_reconect()
   Serial.println("Conectando al servidor mqtt");
   while (!client.connected() && intentos < 5)
   {
-    Serial.println(" . ");
+    Serial.print(" . ");
     intentos++;
   }
 
-  // Si se ha conectado, se suscribe al broker 
+  // Si se ha conectado, se suscribe al broker
   if (client.connect(mqtt_id, mqtt_user, mqtt_password))
   {
     Serial.println("\nEsp32 conectado al broker");
 
-    // Se subscribe al broker 
-    bool suscrito = client.subscribe(topic_sub);
+    // Se subscribe al broker
+    subscrito = client.subscribe(topic_sub);
 
-    // Comprueba que este suscrito al broker 
+    // Comprueba que este suscrito al broker
     if (suscrito)
     {
       Serial.println("suscrito a: ");
@@ -255,7 +257,7 @@ void mqtt_reconect()
   }
 }
 
-// Se conecta con el GPS y lee los datos 
+// Se conecta con el GPS y lee los datos
 void gps_coneccion()
 {
   while (gpsSerial.available() > 0)
@@ -267,7 +269,7 @@ void gps_coneccion()
   }
 }
 
-// Recibir los mensajes del broker 
+// Recibir los mensajes del broker
 void callback(char *topic, byte *payload, unsigned int length)
 {
   mensaje = "";
@@ -279,7 +281,7 @@ void callback(char *topic, byte *payload, unsigned int length)
 
   //================== Control de los motores ==================
 
-  // Procesa la información del mensaje para controlar los motores 
+  // Procesa la información del mensaje para controlar los motores
   if (mensaje == "adelante")
   {
     motores_adelante();
@@ -301,7 +303,7 @@ void callback(char *topic, byte *payload, unsigned int length)
 void envio_de_datos()
 {
   //================== Creacion de un Json para enviar los datos ==================
-  JsonDocument doc; 
+  JsonDocument doc;
 
   // Información del dispositivo
   doc["Dispositivo"] = "Esp32-1";
@@ -317,11 +319,20 @@ void envio_de_datos()
   doc["altitud"] = altitud;
   doc["velocidad"] = velocidad;
 
-  // Envio del documentos Json 
-  char buffer[256];
-  size_t n = serializeJson(doc, buffer);
+  // Envio del documentos Json
+  if (subscrito)
+  {
+    char buffer[256];
+    size_t n = serializeJson(doc, buffer);
 
-  client.publish(topic_sub, (uint8_t *)buffer, (unsigned int)n);
+    client.publish(topic_sub, (uint8_t *)buffer, (unsigned int)n);
+  }
+  else
+  {
+    http.begin(client_WiFi, server);
+
+    http.addHeader("content type")
+  }
 }
 
 // ================== Debugging ==================
@@ -341,7 +352,8 @@ void debug_info()
   delay(1000);
 }
 
-void test_motores() {
+void test_motores()
+{
   Serial.println("Adelante");
   motores_adelante();
   delay(100);
