@@ -7,6 +7,7 @@
 #include <PubSubClient.h>
 #include <stdbool.h>
 #include <HTTPClient.h>
+#include <BluetoothSerial.h>
 
 #include "config.h"
 #include "funciones.h"
@@ -42,11 +43,15 @@ const char *mqtt_user = "Esp32_robot";
 const char *mqtt_id = "ESP32_Robot_001";
 
 // Informacion para el envio de datos por HTTP
-const char *server = "";
-const String *api_key = "";
+const char *server = "12345";
+const char *api_key = "12345";
 
+// coneccion por http con la pagina web
 WiFiClient client_WiFi;
 HTTPClient http;
+
+// coneccion por bluetooth
+BluetoothSerial serialbt;
 
 // Temas para el envio e ingreso de datos
 const char *topic_pub = "esp32/robot/control";
@@ -75,4 +80,4 @@ unsigned long ultimo_envio_mqtt = 0;
 unsigned long ultimo_debug = 0;
 const unsigned long intervalo_envio = 2000;
 const unsigned long intervalo_debug = 5000;
-bool subscrito = false;
+bool subscrito = client.connected();

@@ -1,4 +1,5 @@
 /*=======================================================================
+
   /$$$$$$                                      /$$
  /$$__  $$                                    | $$
 | $$  \__/ /$$$$$$/$$$$   /$$$$$$   /$$$$$$  /$$$$$$
@@ -26,16 +27,19 @@
 |  $$$$$$/|  $$$$$$$| $$  | $$  |  $$$$/| $$| $$  | $$|  $$$$$$$| $$
  \______/  \_______/|__/  |__/   \___/  |__/|__/  |__/ \_______/|__/
 
-====================== INFORMACION DEL PROYECTO =======================
-
- - Unidad Educativa Particular "Siete de Mayo"
- - 3ro de Bachillerato Técnico Unificado - Paralelo "A"
- - Creado por: Eliel González
- - Creado en: Visual Studio Code con platformio
- - Github (Código): https://github.com/crac12456/proyecto-Crea
- - Github (Sitio Web): https://github.com/crac12456/ProyectoCREA-web.git
-
-=======================================================================*/
+========================= INFORMACION DEL PROYECTO ==========================
+*                                                                           *
+*             Unidad Educativa Particular "Siete de Mayo"                   *
+*        3ro de Bachillerato Técnico Unificado - Paralelo "A"               *
+*                                                                           *
+=============================================================================
+*                                                                           *
+*  - Creado por: Eliel González                                             *
+*  - Creado en: Visual Studio Code con platformio                           *
+*  - Github (Código): https://github.com/crac12456/proyecto-Crea            *
+*  - Github (Sitio Web): https://github.com/crac12456/ProyectoCREA-web.git  *
+*                                                                           *
+============================================================================*/
 
 // ================== Headers ==================
 #include <Arduino.h>
@@ -51,6 +55,7 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <stdbool.h>
+#include <BluetoothSerial.h>
 
 #include "funciones.h"
 #include "config.h"
@@ -109,6 +114,8 @@ void setup()
   // Conecta el esp32 con el broker mqtt
   mqtt_reconect();
 
+  serialbt.begin("Smart Blue Sentinel");
+
   // Indicamos que el setup se termino correctamente
   indicador(1, 2);
 
@@ -128,6 +135,12 @@ void loop()
   {
     Serial.print("conectando a mqtt");
     mqtt_reconect();
+  }
+
+  if(serialbt.available())
+  {
+    mensaje = serialbt.read();
+    control_motores(mensaje);
   }
 
   // Loop de envio de mensajes del mqtt
@@ -236,10 +249,10 @@ void mqtt_reconect()
     Serial.println("\nEsp32 conectado al broker");
 
     // Se subscribe al broker
-    subscrito = client.subscribe(topic_sub);
+    //subscrito = client.subscribe(topic_sub);
 
     // Comprueba que este suscrito al broker
-    if (suscrito)
+    if (subscrito)
     {
       Serial.println("suscrito a: ");
       Serial.print(topic_sub);
@@ -272,14 +285,16 @@ void gps_coneccion()
 // Recibir los mensajes del broker
 void callback(char *topic, byte *payload, unsigned int length)
 {
-  mensaje = "";
+  if (subscrito)
+  {  mensaje = "";
 
-  for (int i = 0; i < length; i++)
-  {
-    mensaje += (char)payload[i];
+    for (int i = 0; i < length; i++)
+    {
+      mensaje += (char)payload[i];
+    }
+
+    control_motores(mensaje);
   }
-
-  control_motores();
 }
 
 void envio_de_datos()
@@ -311,9 +326,9 @@ void envio_de_datos()
   }
   else
   {
-    http.begin(client_WiFi, server);
+   // http.begin(client_WiFi, server);
 
-    http.addHeader("content type")
+    //http.addHeader("content type");
   }
 }
 

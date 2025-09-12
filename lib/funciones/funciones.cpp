@@ -135,25 +135,26 @@ void control_motores(String mensaje) {
         return;
     }
 
-    switch (mensaje){
-        case "ad":
-            motores_adelante();
-            break;
-        case "at":
-            motores_atras();
-            break;
-        case "de":
-            motores_derecha();
-            break;
-        case "iz":
-            motores_izquierda();
-            break;
-        default:
-            motores_detener();
+    if (mensaje == "ad")
+    {
+        motores_adelante();
     }
-
+    else if (mensaje == "at")
+    {
+        motores_atras();
+    }
+    else if (mensaje == "de")
+    {
+        motores_derecha();
+    }
+    else if (mensaje == "iz"){
+        motores_izquierda();
+    }
+    else {
+        motores_detener();
+    }
+    
 }
-
 // Adelante 
 void motores_adelante()
 {

@@ -12,6 +12,8 @@
 #include <DallasTemperature.h>
 #include <TinyGPSPlus.h>
 #include <HardwareSerial.h>
+#include <HTTPClient.h>
+#include <BluetoothSerial.h>
 
 // ================== Configuración de los pines ==================
 
@@ -51,11 +53,13 @@ extern const char *mqtt_user;
 extern const char *mqtt_id;
 
 // Informacion para el envio de datos por HTTP
-extern const char *server = "";
-extern const String *api_key = "";
+extern const char *server;
+extern const char *api_key;
 
 extern WiFiClient client_WiFi;
 extern HTTPClient http;
+
+extern BluetoothSerial serialbt;
 
 // Constantes de los temas
 extern const char *topic_pub;
@@ -93,6 +97,6 @@ extern unsigned long ultimo_envio_mqtt;
 extern unsigned long ultimo_debug;
 extern const unsigned long intervalo_envio;     
 extern const unsigned long intervalo_debug; 
-bool subscrito;
+extern bool subscrito;
 
 #endif
