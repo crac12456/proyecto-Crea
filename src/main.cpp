@@ -279,25 +279,7 @@ void callback(char *topic, byte *payload, unsigned int length)
     mensaje += (char)payload[i];
   }
 
-  //================== Control de los motores ==================
-
-  // Procesa la información del mensaje para controlar los motores
-  if (mensaje == "adelante")
-  {
-    motores_adelante();
-  }
-  else if (mensaje == "izquierda")
-  {
-    motores_izquierda();
-  }
-  else if (mensaje == "derecha")
-  {
-    motores_derecha();
-  }
-  else
-  {
-    motores_detener();
-  }
+  control_motores();
 }
 
 void envio_de_datos()

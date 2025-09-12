@@ -4,7 +4,9 @@
 #include <Arduino.h>
 
 // Control de los motores
+void control_motores(String mensaje);
 void motores_adelante();
+void motores_atras();
 void motores_izquierda();
 void motores_derecha();
 void motores_detener();

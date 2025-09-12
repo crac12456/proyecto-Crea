@@ -9,12 +9,14 @@
 #include "funciones.h"
 #include "config.h"
 
-/*==================== Funciones de los sensores  ======================
-
-    Aqui esta la programacion de los drivers de los sensores
-    Las librerias se encuetran arriba, accesibles desde platformIO
-    estan programadas con sintaxis de C
-
+/*=======================================================================
+|                    * Funciones de los sensores *                      |
+=========================================================================
+ *                                                                      *
+ *   Aqui esta la programacion de los drivers de los sensores           *
+ *   Las librerias se encuetran arriba, accesibles desde platformIO     *
+ *   estan programadas con sintaxis de C para mayor simplicidad         *
+ *                                                                      *
 =======================================================================*/
 
 // Variable para un mejor entendimiento 
@@ -25,7 +27,6 @@ const float lectura_analogica_max = 4095.0;
 
 float medicion_de_turbidez()
 {
-
     float voltaje = 0;
     float NTU = 0;
     const int cant_de_lecturas = 800;
@@ -128,6 +129,31 @@ float medicion_temperatura()
 
 // ================== Controles de los motores ==================
 
+void control_motores(String mensaje) {
+    if (mensaje == NULL) {
+        Serial.println("no se ha detectado una entrada correcta");
+        return;
+    }
+
+    switch (mensaje){
+        case "ad":
+            motores_adelante();
+            break;
+        case "at":
+            motores_atras();
+            break;
+        case "de":
+            motores_derecha();
+            break;
+        case "iz":
+            motores_izquierda();
+            break;
+        default:
+            motores_detener();
+    }
+
+}
+
 // Adelante 
 void motores_adelante()
 {
@@ -136,6 +162,15 @@ void motores_adelante()
 
     digitalWrite(motor_izquierda_1, LOW);
     digitalWrite(motor_izquierda_2, HIGH);
+}
+
+void motores_atras()
+{
+    digitalWrite(motor_derecha_1, LOW);
+    digitalWrite(motor_derecha_2, HIGH);
+
+    digitalWrite(motor_izquierda_1, HIGH);
+    digitalWrite(motor_izquierda_2, LOW);
 }
 
 // Derecha 
