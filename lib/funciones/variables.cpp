@@ -5,9 +5,9 @@
 #include <HardwareSerial.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
-#include <stdbool.h>
 #include <HTTPClient.h>
 #include <BluetoothSerial.h>
+#include <vector>
 
 #include "config.h"
 #include "funciones.h"
@@ -50,6 +50,15 @@ const char *api_key = "12345";
 WiFiClient client_WiFi;
 HTTPClient http;
 
+std::vector<String> bufferDatos;
+int reintentos = 0;
+bool mqttDisponible = false;
+
+const int MAX_REINTENTOS_MQTT = 3;
+const int MAX_BUFFER_SIZE = 10;  // Máximo de mensajes en buffer
+const unsigned long TIMEOUT_MQTT = 5000;  // 5 segundos timeout
+const unsigned long INTERVALO_ENVIO = 10000;  // 10 segundos entre envíos
+
 // coneccion por bluetooth
 BluetoothSerial serialbt;
 
@@ -80,4 +89,4 @@ unsigned long ultimo_envio_mqtt = 0;
 unsigned long ultimo_debug = 0;
 const unsigned long intervalo_envio = 2000;
 const unsigned long intervalo_debug = 5000;
-bool subscrito = client.connected();
+bool subscrito = false;

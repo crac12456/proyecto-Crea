@@ -43,7 +43,6 @@
 
 // ================== Headers ==================
 #include <Arduino.h>
-#include <stdbool.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <TinyGPSPlus.h>
@@ -54,8 +53,8 @@
 #include <ArduinoJson.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
-#include <stdbool.h>
 #include <BluetoothSerial.h>
+#include <vector>
 
 #include "funciones.h"
 #include "config.h"
@@ -63,10 +62,10 @@
 // ================== Headers de las funciones ==================
 bool test_gps();
 void conectar_wifi();
-void mqtt_reconect();
+bool mqtt_reconect();
 void gps_coneccion();
 void callback(char *topic, byte *payload, unsigned int lenght);
-void envio_de_datos();
+String crear_json();
 void debug_info();
 void test_motores();
 
@@ -219,6 +218,7 @@ void conectar_wifi()
   if (WiFi.status() == WL_CONNECTED)
   {
     Serial.println("\nWifi conectado");
+
     indicador(2, 1);
   }
   else
@@ -229,7 +229,7 @@ void conectar_wifi()
 }
 
 // ================== Conexión con el broker mqtt ==================
-void mqtt_reconect()
+bool mqtt_reconect()
 {
   // Set up de la conexión
   client.setServer(mqtt_server, mqtt_port);
@@ -252,14 +252,18 @@ void mqtt_reconect()
     //subscrito = client.subscribe(topic_sub);
 
     // Comprueba que este suscrito al broker
-    if (subscrito)
+    if (client.connected())
     {
       Serial.println("suscrito a: ");
       Serial.print(topic_sub);
+      subscrito = true;
+      return false;
     }
     else
     {
       Serial.println("\nerror en la subscripcion");
+      subcrito = false;
+      return false;
     }
     indicador(3, 2);
   }
@@ -297,7 +301,7 @@ void callback(char *topic, byte *payload, unsigned int length)
   }
 }
 
-void envio_de_datos()
+String crear_json()
 {
   //================== Creacion de un Json para enviar los datos ==================
   JsonDocument doc;
@@ -316,20 +320,15 @@ void envio_de_datos()
   doc["altitud"] = altitud;
   doc["velocidad"] = velocidad;
 
-  // Envio del documentos Json
-  if (subscrito)
-  {
-    char buffer[256];
-    size_t n = serializeJson(doc, buffer);
+  String jsonString;
+  serializeJson(doc, JsonString);
+  return jsonString;
+ 
+}
 
-    client.publish(topic_sub, (uint8_t *)buffer, (unsigned int)n);
-  }
-  else
-  {
-   // http.begin(client_WiFi, server);
-
-    //http.addHeader("content type");
-  }
+bool envio_mqtt(const String& datos) 
+{
+  if (mqtt)
 }
 
 // ================== Debugging ==================

@@ -93,6 +93,16 @@ extern float ph;
 extern float turbidez;
 extern float temperatura;
 
+extern std::vector<String>;
+
+extern int reintentos;
+extern bool mqttDisponible;
+
+extern const int MAX_REINTENTOS_MQTT;
+extern const int MAX_BUFFER_SIZE;  // Máximo de mensajes en buffer
+extern const unsigned long TIMEOUT_MQTT;  // 5 segundos timeout
+extern const unsigned long INTERVALO_ENVIO;  // 10 segundos entre envíos
+
 extern unsigned long ultimo_envio_mqtt;
 extern unsigned long ultimo_debug;
 extern const unsigned long intervalo_envio;     
