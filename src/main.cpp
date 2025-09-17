@@ -101,17 +101,18 @@ void setup()
 
   // ================== Set up de sensores y conecciones ==================
 
-  client.setCallback(callback);
-
+  
   // Set up del gps
   sensores.begin();
   gpsSerial.begin(gps_bauds, SERIAL_8N1, gps_RX, gps_TX);
-
+  
   // Conecta el esp32 con la red wifi
   conectar_wifi();
-
+  
   // Conecta el esp32 con el broker mqtt
   mqtt_reconect();
+  client.setServer(mqtt_server, mqtt_port);
+  client.setCallback(callback);
 
   serialbt.begin("Smart Blue Sentinel");
 
@@ -257,7 +258,7 @@ bool mqtt_reconect()
       Serial.println("suscrito a: ");
       Serial.print(topic_sub);
       subscrito = true;
-      return false;
+      return true;
     }
     else
     {
@@ -271,6 +272,7 @@ bool mqtt_reconect()
   {
     Serial.println("\nno se ha podido conectar al servidor mqtt");
     indicador_fallo(10);
+    return false;
   }
 }
 
@@ -301,9 +303,9 @@ void callback(char *topic, byte *payload, unsigned int length)
   }
 }
 
+//================== Creacion de un Json para enviar los datos ==================
 String crear_json()
 {
-  //================== Creacion de un Json para enviar los datos ==================
   JsonDocument doc;
 
   // Información del dispositivo
@@ -323,12 +325,67 @@ String crear_json()
   String jsonString;
   serializeJson(doc, JsonString);
   return jsonString;
- 
 }
 
 bool envio_mqtt(const String& datos) 
 {
-  if (mqtt)
+  if (!client.connected()) 
+  {
+    if (!mqtt_reconect())
+    {
+      return false;
+    }
+  }
+
+  Serial.println("Enviando datos por Mqtt... ");
+
+  if (client.publish(topic_pub, datos.c_str()));
+  {
+    Serial.println("Se han enviado los datos por mqtt");
+    return true;
+  }
+  else 
+  {
+    Serial.println("no se han podido enviar los datos");
+    return false;
+  }
+}
+
+bool envio_http (const String& datos) 
+{
+  Serial.println("enviando los datos por http");
+
+  http.begin(server);
+  http.appHeader("Content-type", "application/json");
+  http.setTimeout(5000);
+
+  int http_responce = http.getString();
+  Serial.println("los datos han sido enviados por http, codigo: " + String(http_responce));
+
+  if (http_responce() > 0 ) 
+  {
+    String responce = http.getString();
+    Serial.println("los datos han sido recbidos por http");
+
+    http.end();
+    return (http_responce >= 200 && http_responce < 300);
+  }
+  else {
+    Serial.println("Error en la peticion http: " + String(http_responce));
+    http.close();
+    return false;
+  }
+}
+
+void agregarBuffer(const String& datos) {
+  if (bufferDatos.size() >= MAX_BUFFER_SIZE) 
+  {
+    Serial.println("El buffer esta lleno, eliminando los datos mas antiguos");
+    bufferDatos.erase(bufferDatos.begin());
+  }
+
+  bufferDatos.push_back(datos);
+  Serial.println("Datos agregados al buffer, total: " + String(bufferDatos.size()) + " elementos");
 }
 
 // ================== Debugging ==================

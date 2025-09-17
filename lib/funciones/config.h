@@ -93,8 +93,7 @@ extern float ph;
 extern float turbidez;
 extern float temperatura;
 
-extern std::vector<String>;
-
+extern std::vector<String> bufferDatos;
 extern int reintentos;
 extern bool mqttDisponible;
 
