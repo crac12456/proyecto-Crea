@@ -22,13 +22,17 @@ Como se puede ver, tenemos una considerable cantidad de librerias, aunque puede 
 - __stdbool.h__ Parte de la libreria estandart de C, este permite utiliza booleanos (valores binarios que pueden ser positivos o falsos).
 - __OneWire.h__ Esta libreria permite utilizar el protocolo OneWire que utiliza un solo cable para comunicarse con cosas como sensores.
 - __DallasTemperature.h__ Libreria de la empresa creadora del *DS18B20*, sensor que utilizamos para medir la temperatura, este permite conseguir las mediciones de temperatura de forma sencilla.
+- __HardwareSerial.h__ harware serial nos permite una comunicación serial
+- __PubSubClient.h__ Public Subscrition Client jouiouioui
 - __TinyGPSPlus.h:__ Esta libreria nos permite utilizar el gps de for mas sensilla y entendible
 - __HardwareSerial.h__ Utilizamos esta libreria para la comunicacion con el gps, es necesaria para utilizar TinyGPSPlus.
 - __PubSubClient.h__ Esta libreria nos permite utilizar comunicaciones de tipo cliente, en este caso utilzamos mqtt, la cual utiliza un metodo de subscripcion y publicacion para las comunicaciones.
 - __SPI:__ Libreria necesaria para la coneccion con Wifi.
 - __Wifi:__ Esta libreria nos facilita en gran forma la coneccion a una red Wifi, necesaria para mqtt.
 - __ArduinoJson:__ Esta libreria permite crear archivos json (el archivo de guardato de datos de javascript), el cual nos permite enviar datos a el backend de la pagina web de forma mas estructurada y legible
-- __funciones.h__ Este es un archivo del proyecto, encontrado en la carpeta lib/funciones, en este se encuentra los controladores de los sensores, facilitando su uso, asi como un par de funciones utiles más..
+
+- __funciones.h__ Este es un archivo del proyecto, encontrado en la carpeta lib/funciones, en este se encuentra los controladores de los sensores, facilitando su uso, asi como un par de funciones utiles más.
+
 - __config.h:__ En este Header estan declarados todos los pines, asi como distintas variables globales que se utilizan en diferentes partes del proyecto, cosas como constructures de los sensores y informacion necesaria para el WiFi como la red y contraseña, asi como distintas cosas necesarias para el uso de mqtt.
 
 ## Setup

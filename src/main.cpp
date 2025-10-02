@@ -101,14 +101,13 @@ void setup()
 
   // ================== Set up de sensores y conecciones ==================
 
-  
   // Set up del gps
   sensores.begin();
   gpsSerial.begin(gps_bauds, SERIAL_8N1, gps_RX, gps_TX);
-  
+
   // Conecta el esp32 con la red wifi
   conectar_wifi();
-  
+
   // Conecta el esp32 con el broker mqtt
   mqtt_reconect();
   client.setServer(mqtt_server, mqtt_port);
@@ -137,7 +136,7 @@ void loop()
     mqtt_reconect();
   }
 
-  if(serialbt.available())
+  if (serialbt.available())
   {
     mensaje = serialbt.read();
     control_motores(mensaje);
@@ -250,7 +249,7 @@ bool mqtt_reconect()
     Serial.println("\nEsp32 conectado al broker");
 
     // Se subscribe al broker
-    //subscrito = client.subscribe(topic_sub);
+    // subscrito = client.subscribe(topic_sub);
 
     // Comprueba que este suscrito al broker
     if (client.connected())
@@ -292,7 +291,8 @@ void gps_coneccion()
 void callback(char *topic, byte *payload, unsigned int length)
 {
   if (subscrito)
-  {  mensaje = "";
+  {
+    mensaje = "";
 
     for (int i = 0; i < length; i++)
     {
@@ -322,14 +322,15 @@ String crear_json()
   doc["altitud"] = altitud;
   doc["velocidad"] = velocidad;
 
+  // Crear un string con el json y se regresa 
   String jsonString;
   serializeJson(doc, JsonString);
   return jsonString;
 }
 
-bool envio_mqtt(const String& datos) 
+bool envio_mqtt(const String &datos)
 {
-  if (!client.connected()) 
+  if (!client.connected())
   {
     if (!mqtt_reconect())
     {
@@ -339,19 +340,20 @@ bool envio_mqtt(const String& datos)
 
   Serial.println("Enviando datos por Mqtt... ");
 
-  if (client.publish(topic_pub, datos.c_str()));
+  if (client.publish(topic_pub, datos.c_str()))
+    ;
   {
     Serial.println("Se han enviado los datos por mqtt");
     return true;
   }
-  else 
+  else
   {
     Serial.println("no se han podido enviar los datos");
     return false;
   }
 }
 
-bool envio_http (const String& datos) 
+bool envio_http(const String &datos)
 {
   Serial.println("enviando los datos por http");
 
@@ -362,7 +364,7 @@ bool envio_http (const String& datos)
   int http_responce = http.getString();
   Serial.println("los datos han sido enviados por http, codigo: " + String(http_responce));
 
-  if (http_responce() > 0 ) 
+  if (http_responce() > 0)
   {
     String responce = http.getString();
     Serial.println("los datos han sido recbidos por http");
@@ -370,15 +372,17 @@ bool envio_http (const String& datos)
     http.end();
     return (http_responce >= 200 && http_responce < 300);
   }
-  else {
+  else
+  {
     Serial.println("Error en la peticion http: " + String(http_responce));
     http.close();
     return false;
   }
 }
 
-void agregarBuffer(const String& datos) {
-  if (bufferDatos.size() >= MAX_BUFFER_SIZE) 
+void agregarBuffer(const String &datos)
+{
+  if (bufferDatos.size() >= MAX_BUFFER_SIZE)
   {
     Serial.println("El buffer esta lleno, eliminando los datos mas antiguos");
     bufferDatos.erase(bufferDatos.begin());
@@ -388,10 +392,92 @@ void agregarBuffer(const String& datos) {
   Serial.println("Datos agregados al buffer, total: " + String(bufferDatos.size()) + " elementos");
 }
 
+void procesar_buffer()
+{
+  if (bufferDatos.empty())
+  {
+    return;
+  }
+
+  Seria.println("Procesando buffer (" + String(bufferDatos.size()) + " elementos");
+
+  for (int i = bufferDatos.size() - 1; i >= 0; i--)
+  {
+    bool enviado = false;
+
+    if (mqttDisponible || mqtt_reconect())
+    {
+      enviado = envio_mqtt(bufferDatos[i]);
+    }
+
+    if (enviado)
+    {
+      bufferDatos.erase(bufferDatos.begin() + i);
+      Serial.println("Se han enviado los datos correctamente");
+    } else {
+      Serial.println("no se han podido enviar los datos");
+      break;
+    }
+  }
+
+  delay(100);
+}
+
+void enviar_datos() 
+{
+  String datos = crear_json();
+  bool enviado = false; 
+
+  Serial.println("\n============== Iniciando envio de datos ==============")
+  Serial.println("Datos a enviar: " + datos);
+
+  //intentamos enviar por el broker
+  if (WiFi.status() == WL_CONECTED) 
+  {
+    if (reintentos < MAX_REINTENTOS_MQTT)
+    {
+      enviado = envio_mqtt(datos);
+
+      if (!enviado) 
+      {
+        reintentos++;
+        Serial.println("Reintento MQTT " + String(reintentos) + "/" + String(MAX_REINTENTOS_MQTT));
+
+      }
+    }
+
+    if (!enviado) 
+    {
+      Serial.println("Cambiando a http");
+      enviado = envio_http();
+
+      if (enviado) 
+      {
+        reintentos = 0;
+      }
+    }
+  } else {
+    Serial.println("El WiFi esta desconectado, intentado reconectar . . . ");
+    conectar_wifi();
+  }
+
+  if (!enviado) 
+  {
+    Serial.println("guardando datos en el buffer hasta reconeccion");
+    agregarBuffer(datos);
+  } else {
+    procesar_buffer();
+  }
+
+  Serial.println("/n============== fin del envio de datos ==============");
+}
+
 // ================== Debugging ==================
 
 void debug_info()
 {
+  Serial.println("El WiFi esta: "+ String(Wifi.status() == WL_CONNECTED ? "Conectado" : "Desconectado") );
+  Serial.println("Mqtt esta: "+ String(mqttDisponible ? "Conectado" : "Desconectado") );
   Serial.println("La temperatura es: ");
   Serial.print(temperatura);
   Serial.println("La latitud es: ");
