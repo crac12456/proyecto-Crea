@@ -130,7 +130,7 @@ float medicion_temperatura()
 // ================== Controles de los motores ==================
 
 void control_motores(String mensaje) {
-    if (mensaje == NULL) {
+    if (mensaje == "" || mensaje.length() == 0) {
         Serial.println("no se ha detectado una entrada correcta");
         return;
     }

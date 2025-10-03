@@ -68,6 +68,8 @@ void callback(char *topic, byte *payload, unsigned int lenght);
 String crear_json();
 void debug_info();
 void test_motores();
+void procesar_buffer();
+void enviar_datos();
 
 // ================== Set up del proyecto ==================
 
@@ -142,9 +144,6 @@ void loop()
     control_motores(mensaje);
   }
 
-  // Loop de envio de mensajes del mqtt
-  client.loop();
-
   // Verifica la conexión con el wifi y lo reconecta de ser necesario
   if (WiFi.status() != WL_CONNECTED)
   {
@@ -166,10 +165,18 @@ void loop()
   static unsigned long ultimo_envio = 0;
   const int tiempo_maximo = 2000;
 
+  
+  // Loop de envio de mensajes del mqtt
+  if (mqttDisponible) 
+  {
+    client.loop();
+  }
+
   // Si se estan enviando los datos, consegue los datos del GPS
   if (millis() - ultimo_envio >= tiempo_maximo)
   {
     ultimo_envio = millis();
+    enviar_datos();
 
     // Conseguimos los datos del GPS si este esta disponible
     if (gps.location.isValid())
@@ -179,8 +186,6 @@ void loop()
       altitud = gps.altitude.meters();
       velocidad = gps.speed.kmph();
 
-      envio_de_datos(); // Función que envia los datos por mqtt al backend
-
       digitalWrite(led_interno, !digitalRead(led_interno));
     }
     else
@@ -189,8 +194,17 @@ void loop()
     }
   }
 
+  static unsigned long ultimoEstado = 0;
+  if (millis() - ultimoEstado >= 60000)
+  {
+    Serial.println("Procesamiento periodico del buffer");
+    procesar_buffer();
+    ultimoEstado = millis();
+  }
+
+  delay(1000);
   // debug
-  test_motores();
+  debug_info();
 }
 
 // ================== Conexión con la red ==================
@@ -262,7 +276,7 @@ bool mqtt_reconect()
     else
     {
       Serial.println("\nerror en la subscripcion");
-      subcrito = false;
+      subscrito = false;
       return false;
     }
     indicador(3, 2);
@@ -324,7 +338,7 @@ String crear_json()
 
   // Crear un string con el json y se regresa 
   String jsonString;
-  serializeJson(doc, JsonString);
+  serializeJson(doc, jsonString);
   return jsonString;
 }
 
@@ -341,7 +355,6 @@ bool envio_mqtt(const String &datos)
   Serial.println("Enviando datos por Mqtt... ");
 
   if (client.publish(topic_pub, datos.c_str()))
-    ;
   {
     Serial.println("Se han enviado los datos por mqtt");
     return true;
@@ -358,24 +371,26 @@ bool envio_http(const String &datos)
   Serial.println("enviando los datos por http");
 
   http.begin(server);
-  http.appHeader("Content-type", "application/json");
+  http.addHeader("Content-type", "application/json");
   http.setTimeout(5000);
 
-  int http_responce = http.getString();
-  Serial.println("los datos han sido enviados por http, codigo: " + String(http_responce));
+  int httpResponceCode = http.POST(datos);
 
-  if (http_responce() > 0)
+  if (httpResponceCode > 0)
   {
-    String responce = http.getString();
-    Serial.println("los datos han sido recbidos por http");
+    String http_responce = http.getString();
+    Serial.println("los datos han sido enviados por http, codigo: " + String(http_responce));
+
+    if (http_responce.length() > 0)
+    {
+      Serial.println("Respuesta del servidor: " + http_responce);
+    }
 
     http.end();
-    return (http_responce >= 200 && http_responce < 300);
-  }
-  else
-  {
-    Serial.println("Error en la peticion http: " + String(http_responce));
-    http.close();
+    return (httpResponceCode >= 200 && httpResponceCode < 300);
+  } else {
+    Serial.println("Error en la peticion http: " + String(httpResponceCode));
+    http.end();
     return false;
   }
 }
@@ -399,7 +414,7 @@ void procesar_buffer()
     return;
   }
 
-  Seria.println("Procesando buffer (" + String(bufferDatos.size()) + " elementos");
+  Serial.println("Procesando buffer (" + String(bufferDatos.size()) + " elementos");
 
   for (int i = bufferDatos.size() - 1; i >= 0; i--)
   {
@@ -428,11 +443,11 @@ void enviar_datos()
   String datos = crear_json();
   bool enviado = false; 
 
-  Serial.println("\n============== Iniciando envio de datos ==============")
+  Serial.println("\n============== Iniciando envio de datos ==============");
   Serial.println("Datos a enviar: " + datos);
 
   //intentamos enviar por el broker
-  if (WiFi.status() == WL_CONECTED) 
+  if (WiFi.status() == WL_CONNECTED) 
   {
     if (reintentos < MAX_REINTENTOS_MQTT)
     {
@@ -449,7 +464,7 @@ void enviar_datos()
     if (!enviado) 
     {
       Serial.println("Cambiando a http");
-      enviado = envio_http();
+      enviado = envio_http(datos);
 
       if (enviado) 
       {
@@ -469,14 +484,14 @@ void enviar_datos()
     procesar_buffer();
   }
 
-  Serial.println("/n============== fin del envio de datos ==============");
+  Serial.println("\n============== fin del envio de datos ==============");
 }
 
 // ================== Debugging ==================
 
 void debug_info()
 {
-  Serial.println("El WiFi esta: "+ String(Wifi.status() == WL_CONNECTED ? "Conectado" : "Desconectado") );
+  Serial.println("El WiFi esta: "+ String(WiFi.status() == WL_CONNECTED ? "Conectado" : "Desconectado") );
   Serial.println("Mqtt esta: "+ String(mqttDisponible ? "Conectado" : "Desconectado") );
   Serial.println("La temperatura es: ");
   Serial.print(temperatura);
@@ -497,12 +512,12 @@ void test_motores()
   motores_adelante();
   delay(100);
   Serial.println("Derecha");
-  motores_izquierda();
+  motores_derecha();
   delay(100);
   Serial.println("Izquierda");
   motores_izquierda();
   delay(100);
   Serial.println("Detener");
-  motores_izquierda();
+  motores_detener();
   delay(100);
 }
