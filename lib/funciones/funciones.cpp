@@ -51,7 +51,7 @@ float medicion_de_turbidez()
     if (voltaje < 2.5)
     {
         // NTU maximo
-        NTU = 3000;
+        //NTU = 3000;
     }
     else if (voltaje < 4.2)
     {
@@ -129,31 +129,27 @@ float medicion_temperatura()
 
 // ================== Controles de los motores ==================
 
-void control_motores(String mensaje) {
-    if (mensaje == "" || mensaje.length() == 0) {
-        Serial.println("no se ha detectado una entrada correcta");
-        return;
-    }
-
-    if (mensaje == "ad")
-    {
-        motores_adelante();
-    }
-    else if (mensaje == "at")
-    {
-        motores_atras();
-    }
-    else if (mensaje == "de")
-    {
-        motores_derecha();
-    }
-    else if (mensaje == "iz"){
-        motores_izquierda();
-    }
-    else {
-        motores_detener();
-    }
-    
+void control_motores(char mensaje) {     
+     switch (mensaje)
+     {
+        case 'F':
+            motores_adelante();
+            break;
+        case 'B':
+            motores_atras();
+            break;
+        case 'R':
+            motores_derecha();
+            break;
+        case 'L':
+            motores_izquierda();
+            break;
+        case 'S':
+            motores_detener();
+            break;
+        default:
+            break;
+        }
 }
 // Adelante 
 void motores_adelante()
@@ -163,6 +159,8 @@ void motores_adelante()
 
     digitalWrite(motor_izquierda_1, LOW);
     digitalWrite(motor_izquierda_2, HIGH);
+
+    Serial.println("motores adelante");
 }
 
 void motores_atras()
@@ -172,6 +170,8 @@ void motores_atras()
 
     digitalWrite(motor_izquierda_1, HIGH);
     digitalWrite(motor_izquierda_2, LOW);
+
+    Serial.println("motores atras");
 }
 
 // Derecha 
@@ -182,6 +182,8 @@ void motores_derecha()
 
     digitalWrite(motor_izquierda_1, LOW);
     digitalWrite(motor_izquierda_2, HIGH);
+
+    Serial.println("motores deracha");
 }
 
 // Izquierda
@@ -192,6 +194,8 @@ void motores_izquierda()
 
     digitalWrite(motor_izquierda_1, LOW);
     digitalWrite(motor_izquierda_2, LOW);
+
+    Serial.println("motores izquierda");
 }
 
 // Detener 
@@ -202,6 +206,8 @@ void motores_detener()
 
     digitalWrite(motor_izquierda_1, LOW);
     digitalWrite(motor_izquierda_2, LOW);
+
+    Serial.println("motores detener");
 }
 
 // ================== Indicadores de luz ==================

@@ -81,6 +81,7 @@ extern int tiempo_max_ms;
 extern WiFiClient espClient;
 extern PubSubClient client;
 extern String mensaje;
+extern char mensajeBT;
 
 // Declaración de las variables del GPS, estas se enviaran por mqtt
 extern double latitud;
@@ -107,5 +108,6 @@ extern unsigned long ultimo_debug;
 extern const unsigned long intervalo_envio;     
 extern const unsigned long intervalo_debug; 
 extern bool subscrito;
+extern bool ultimoIntento;
 
 #endif

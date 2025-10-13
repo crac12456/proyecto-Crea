@@ -123,6 +123,7 @@ void setup()
   // Apago los motores por seguridad
   motores_detener();
   test_motores();
+  debug_info();
 }
 
 // ================== Loop prinicpal del proyecto ==================
@@ -140,8 +141,12 @@ void loop()
 
   if (serialbt.available())
   {
-    mensaje = serialbt.read();
-    control_motores(mensaje);
+    mensajeBT = serialbt.read();
+    control_motores(mensajeBT);
+    
+    Serial.println("Se ha conectado al dispositivo por BT");
+    Serial.println("mensaje: ");
+    Serial.println(mensajeBT);
   }
 
   // Verifica la conexión con el wifi y lo reconecta de ser necesario
@@ -165,9 +170,8 @@ void loop()
   static unsigned long ultimo_envio = 0;
   const int tiempo_maximo = 2000;
 
-  
   // Loop de envio de mensajes del mqtt
-  if (mqttDisponible) 
+  if (mqttDisponible)
   {
     client.loop();
   }
@@ -205,6 +209,7 @@ void loop()
   delay(1000);
   // debug
   debug_info();
+  test_motores();
 }
 
 // ================== Conexión con la red ==================
@@ -245,6 +250,10 @@ void conectar_wifi()
 // ================== Conexión con el broker mqtt ==================
 bool mqtt_reconect()
 {
+  if (ultimoIntento)
+  {
+    return false;
+  }
   // Set up de la conexión
   client.setServer(mqtt_server, mqtt_port);
 
@@ -285,6 +294,7 @@ bool mqtt_reconect()
   {
     Serial.println("\nno se ha podido conectar al servidor mqtt");
     indicador_fallo(10);
+    ultimoIntento = true;
     return false;
   }
 }
@@ -313,7 +323,7 @@ void callback(char *topic, byte *payload, unsigned int length)
       mensaje += (char)payload[i];
     }
 
-    control_motores(mensaje);
+    //control_motores(mensaje);
   }
 }
 
@@ -323,7 +333,7 @@ String crear_json()
   JsonDocument doc;
 
   // Información del dispositivo
-  doc["Dispositivo"] = "Esp32-1";
+  doc["dispositivo"] = "esp32-1";
 
   // Sensores
   doc["temperatura"] = temperatura;
@@ -336,7 +346,7 @@ String crear_json()
   doc["altitud"] = altitud;
   doc["velocidad"] = velocidad;
 
-  // Crear un string con el json y se regresa 
+  // Crear un string con el json y se regresa
   String jsonString;
   serializeJson(doc, jsonString);
   return jsonString;
@@ -388,7 +398,9 @@ bool envio_http(const String &datos)
 
     http.end();
     return (httpResponceCode >= 200 && httpResponceCode < 300);
-  } else {
+  }
+  else
+  {
     Serial.println("Error en la peticion http: " + String(httpResponceCode));
     http.end();
     return false;
@@ -429,7 +441,9 @@ void procesar_buffer()
     {
       bufferDatos.erase(bufferDatos.begin() + i);
       Serial.println("Se han enviado los datos correctamente");
-    } else {
+    }
+    else
+    {
       Serial.println("no se han podido enviar los datos");
       break;
     }
@@ -438,49 +452,52 @@ void procesar_buffer()
   delay(100);
 }
 
-void enviar_datos() 
+void enviar_datos()
 {
   String datos = crear_json();
-  bool enviado = false; 
+  bool enviado = false;
 
   Serial.println("\n============== Iniciando envio de datos ==============");
   Serial.println("Datos a enviar: " + datos);
 
-  //intentamos enviar por el broker
-  if (WiFi.status() == WL_CONNECTED) 
+  // intentamos enviar por el broker
+  if (WiFi.status() == WL_CONNECTED)
   {
     if (reintentos < MAX_REINTENTOS_MQTT)
     {
       enviado = envio_mqtt(datos);
 
-      if (!enviado) 
+      if (!enviado)
       {
         reintentos++;
         Serial.println("Reintento MQTT " + String(reintentos) + "/" + String(MAX_REINTENTOS_MQTT));
-
       }
     }
 
-    if (!enviado) 
+    if (!enviado)
     {
       Serial.println("Cambiando a http");
       enviado = envio_http(datos);
 
-      if (enviado) 
+      if (enviado)
       {
         reintentos = 0;
       }
     }
-  } else {
+  }
+  else
+  {
     Serial.println("El WiFi esta desconectado, intentado reconectar . . . ");
     conectar_wifi();
   }
 
-  if (!enviado) 
+  if (!enviado)
   {
     Serial.println("guardando datos en el buffer hasta reconeccion");
     agregarBuffer(datos);
-  } else {
+  }
+  else
+  {
     procesar_buffer();
   }
 
@@ -491,18 +508,21 @@ void enviar_datos()
 
 void debug_info()
 {
-  Serial.println("El WiFi esta: "+ String(WiFi.status() == WL_CONNECTED ? "Conectado" : "Desconectado") );
-  Serial.println("Mqtt esta: "+ String(mqttDisponible ? "Conectado" : "Desconectado") );
-  Serial.println("La temperatura es: ");
+  Serial.println("El WiFi esta: " + String(WiFi.status() == WL_CONNECTED ? "Conectado" : "Desconectado"));
+  Serial.println("Mqtt esta: " + String(mqttDisponible ? "Conectado" : "Desconectado"));
+  Serial.print("\nLa turbidez es: ");
+  Serial.print(turbidez);
+  Serial.print("\nLa temperatura es: ");
   Serial.print(temperatura);
-  Serial.println("La latitud es: ");
+  Serial.print("\nLa latitud es: ");
   Serial.print(latitud);
-  Serial.println("La longitud es: ");
+  Serial.print("\nLa longitud es: ");
   Serial.print(longitud);
-  Serial.println("La altitud es: ");
+  Serial.print("\nLa altitud es: ");
   Serial.print(altitud);
-  Serial.println("La velocidad es: ");
+  Serial.print("\nLa velocidad es: ");
   Serial.print(velocidad);
+  Serial.print("\n");
   delay(1000);
 }
 
@@ -511,13 +531,17 @@ void test_motores()
   Serial.println("Adelante");
   motores_adelante();
   delay(100);
-  Serial.println("Derecha");
-  motores_derecha();
-  delay(100);
-  Serial.println("Izquierda");
-  motores_izquierda();
-  delay(100);
-  Serial.println("Detener");
   motores_detener();
-  delay(100);
+
+  //Serial.println("Derecha");
+  //motores_derecha();
+  //delay(100);
+
+  //Serial.println("Izquierda");
+  //motores_izquierda();
+  //delay(100);
+  
+  //Serial.println("Detener");
+  //motores_detener();
+  //delay(100);
 }

@@ -43,8 +43,8 @@ const char *mqtt_user = "Esp32_robot";
 const char *mqtt_id = "ESP32_Robot_001";
 
 // Informacion para el envio de datos por HTTP
-const char *server = "12345";
-const char *api_key = "12345";
+const char *server = "http://186.3.9.189:9000/api/datos";
+const char *api_key = "";
 
 // coneccion por http con la pagina web
 WiFiClient client_WiFi;
@@ -78,7 +78,8 @@ HardwareSerial gpsSerial(2);
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-String mensaje = "";
+String mensaje = " ";
+char mensajeBT = ' ';
 
 // Conseguimos el tiempo desde que se empezo el arduino
 unsigned long tiempo_desde_inicio = millis();
@@ -90,3 +91,4 @@ unsigned long ultimo_debug = 0;
 const unsigned long intervalo_envio = 2000;
 const unsigned long intervalo_debug = 5000;
 bool subscrito = false;
+bool ultimoIntento = false;
