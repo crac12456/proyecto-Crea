@@ -129,27 +129,34 @@ float medicion_temperatura()
 
 // ================== Controles de los motores ==================
 
-void control_motores(char mensaje) {     
-     switch (mensaje)
-     {
+void control_motores(char mensaje) {    
+    Serial.println("procesando mensaje");
+
+    switch (mensaje)
+    {
         case 'F':
+            Serial.println("Mensaje recibido, motores adelante");
             motores_adelante();
             break;
         case 'B':
+            Serial.println("Mensaje recibido, motores atras");
             motores_atras();
             break;
         case 'R':
+            Serial.println("Mensaje recibido, motores derecha");
             motores_derecha();
             break;
         case 'L':
+            Serial.println("Mensaje recibido, motores izquierda");
             motores_izquierda();
             break;
         case 'S':
+            Serial.println("Mensaje recibido, motores detener");
             motores_detener();
             break;
         default:
             break;
-        }
+    }
 }
 // Adelante 
 void motores_adelante()

@@ -121,8 +121,8 @@ void setup()
   indicador(1, 2);
 
   // Apago los motores por seguridad
-  motores_detener();
-  test_motores();
+  //motores_detener();
+  //test_motores();
   debug_info();
 }
 
@@ -185,6 +185,8 @@ void loop()
     // Conseguimos los datos del GPS si este esta disponible
     if (gps.location.isValid())
     {
+      Serial.println("Leyendos datos del gps");
+      
       latitud = gps.location.lat();
       longitud = gps.location.lng();
       altitud = gps.altitude.meters();
@@ -206,10 +208,13 @@ void loop()
     ultimoEstado = millis();
   }
 
-  delay(1000);
+  unsigned long tiempo = 0;
+  if (millis() - tiempo >= 2000){
+    tiempo = millis();
+  }
   // debug
   debug_info();
-  test_motores();
+  //test_motores();
 }
 
 // ================== Conexión con la red ==================
@@ -510,6 +515,7 @@ void debug_info()
 {
   Serial.println("El WiFi esta: " + String(WiFi.status() == WL_CONNECTED ? "Conectado" : "Desconectado"));
   Serial.println("Mqtt esta: " + String(mqttDisponible ? "Conectado" : "Desconectado"));
+  Serial.println("El Bluetooth esta: " + String(serialbt.available() ? "Disponible" : "No disponible"));
   Serial.print("\nLa turbidez es: ");
   Serial.print(turbidez);
   Serial.print("\nLa temperatura es: ");
