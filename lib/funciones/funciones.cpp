@@ -9,12 +9,14 @@
 #include "funciones.h"
 #include "config.h"
 
-/*==================== Funciones de los sensores  ======================
-
-    Aqui esta la programacion de los drivers de los sensores
-    Las librerias se encuetran arriba, accesibles desde platformIO
-    estan programadas con sintaxis de C
-
+/*=======================================================================
+|                    * Funciones de los sensores *                      |
+=========================================================================
+ *                                                                      *
+ *   Aqui esta la programacion de los drivers de los sensores           *
+ *   Las librerias se encuetran arriba, accesibles desde platformIO     *
+ *   estan programadas con sintaxis de C para mayor simplicidad         *
+ *                                                                      *
 =======================================================================*/
 
 // Variable para un mejor entendimiento 
@@ -25,7 +27,6 @@ const float lectura_analogica_max = 4095.0;
 
 float medicion_de_turbidez()
 {
-
     float voltaje = 0;
     float NTU = 0;
     const int cant_de_lecturas = 800;
@@ -50,7 +51,7 @@ float medicion_de_turbidez()
     if (voltaje < 2.5)
     {
         // NTU maximo
-        NTU = 3000;
+        //NTU = 3000;
     }
     else if (voltaje < 4.2)
     {
@@ -128,6 +129,35 @@ float medicion_temperatura()
 
 // ================== Controles de los motores ==================
 
+void control_motores(char mensaje) {    
+    Serial.println("procesando mensaje");
+
+    switch (mensaje)
+    {
+        case 'F':
+            Serial.println("Mensaje recibido, motores adelante");
+            motores_adelante();
+            break;
+        case 'B':
+            Serial.println("Mensaje recibido, motores atras");
+            motores_atras();
+            break;
+        case 'R':
+            Serial.println("Mensaje recibido, motores derecha");
+            motores_derecha();
+            break;
+        case 'L':
+            Serial.println("Mensaje recibido, motores izquierda");
+            motores_izquierda();
+            break;
+        case 'S':
+            Serial.println("Mensaje recibido, motores detener");
+            motores_detener();
+            break;
+        default:
+            break;
+    }
+}
 // Adelante 
 void motores_adelante()
 {
@@ -136,6 +166,19 @@ void motores_adelante()
 
     digitalWrite(motor_izquierda_1, LOW);
     digitalWrite(motor_izquierda_2, HIGH);
+
+    Serial.println("motores adelante");
+}
+
+void motores_atras()
+{
+    digitalWrite(motor_derecha_1, LOW);
+    digitalWrite(motor_derecha_2, HIGH);
+
+    digitalWrite(motor_izquierda_1, HIGH);
+    digitalWrite(motor_izquierda_2, LOW);
+
+    Serial.println("motores atras");
 }
 
 // Derecha 
@@ -146,6 +189,8 @@ void motores_derecha()
 
     digitalWrite(motor_izquierda_1, LOW);
     digitalWrite(motor_izquierda_2, HIGH);
+
+    Serial.println("motores deracha");
 }
 
 // Izquierda
@@ -156,6 +201,8 @@ void motores_izquierda()
 
     digitalWrite(motor_izquierda_1, LOW);
     digitalWrite(motor_izquierda_2, LOW);
+
+    Serial.println("motores izquierda");
 }
 
 // Detener 
@@ -166,6 +213,8 @@ void motores_detener()
 
     digitalWrite(motor_izquierda_1, LOW);
     digitalWrite(motor_izquierda_2, LOW);
+
+    Serial.println("motores detener");
 }
 
 // ================== Indicadores de luz ==================

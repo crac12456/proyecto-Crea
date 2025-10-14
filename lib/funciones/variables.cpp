@@ -5,8 +5,9 @@
 #include <HardwareSerial.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
-#include <stdbool.h>
 #include <HTTPClient.h>
+#include <BluetoothSerial.h>
+#include <vector>
 
 #include "config.h"
 #include "funciones.h"
@@ -42,11 +43,24 @@ const char *mqtt_user = "Esp32_robot";
 const char *mqtt_id = "ESP32_Robot_001";
 
 // Informacion para el envio de datos por HTTP
-const char *server = "";
-const String *api_key = "";
+const char *server = "http://186.3.9.189:9000/api/datos";
+const char *api_key = "";
 
+// coneccion por http con la pagina web
 WiFiClient client_WiFi;
 HTTPClient http;
+
+std::vector<String> bufferDatos;
+int reintentos = 0;
+bool mqttDisponible = false;
+
+const int MAX_REINTENTOS_MQTT = 3;
+const int MAX_BUFFER_SIZE = 10;  // Máximo de mensajes en buffer
+const unsigned long TIMEOUT_MQTT = 5000;  // 5 segundos timeout
+const unsigned long INTERVALO_ENVIO = 10000;  // 10 segundos entre envíos
+
+// coneccion por bluetooth
+BluetoothSerial serialbt;
 
 // Temas para el envio e ingreso de datos
 const char *topic_pub = "esp32/robot/control";
@@ -64,7 +78,8 @@ HardwareSerial gpsSerial(2);
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-String mensaje = "";
+String mensaje = " ";
+char mensajeBT = ' ';
 
 // Conseguimos el tiempo desde que se empezo el arduino
 unsigned long tiempo_desde_inicio = millis();
@@ -76,3 +91,4 @@ unsigned long ultimo_debug = 0;
 const unsigned long intervalo_envio = 2000;
 const unsigned long intervalo_debug = 5000;
 bool subscrito = false;
+bool ultimoIntento = false;

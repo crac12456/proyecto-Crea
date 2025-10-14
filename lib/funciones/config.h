@@ -12,6 +12,8 @@
 #include <DallasTemperature.h>
 #include <TinyGPSPlus.h>
 #include <HardwareSerial.h>
+#include <HTTPClient.h>
+#include <BluetoothSerial.h>
 
 // ================== Configuración de los pines ==================
 
@@ -51,11 +53,13 @@ extern const char *mqtt_user;
 extern const char *mqtt_id;
 
 // Informacion para el envio de datos por HTTP
-extern const char *server = "";
-extern const String *api_key = "";
+extern const char *server;
+extern const char *api_key;
 
 extern WiFiClient client_WiFi;
 extern HTTPClient http;
+
+extern BluetoothSerial serialbt;
 
 // Constantes de los temas
 extern const char *topic_pub;
@@ -77,6 +81,7 @@ extern int tiempo_max_ms;
 extern WiFiClient espClient;
 extern PubSubClient client;
 extern String mensaje;
+extern char mensajeBT;
 
 // Declaración de las variables del GPS, estas se enviaran por mqtt
 extern double latitud;
@@ -89,10 +94,20 @@ extern float ph;
 extern float turbidez;
 extern float temperatura;
 
+extern std::vector<String> bufferDatos;
+extern int reintentos;
+extern bool mqttDisponible;
+
+extern const int MAX_REINTENTOS_MQTT;
+extern const int MAX_BUFFER_SIZE;  // Máximo de mensajes en buffer
+extern const unsigned long TIMEOUT_MQTT;  // 5 segundos timeout
+extern const unsigned long INTERVALO_ENVIO;  // 10 segundos entre envíos
+
 extern unsigned long ultimo_envio_mqtt;
 extern unsigned long ultimo_debug;
 extern const unsigned long intervalo_envio;     
 extern const unsigned long intervalo_debug; 
-bool subscrito;
+extern bool subscrito;
+extern bool ultimoIntento;
 
 #endif
