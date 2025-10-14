@@ -33,7 +33,7 @@ float medicion_de_turbidez()
 
     // Se convierte a voltaje para entenderlo mas facilmente
     voltaje = analogRead(sensor_de_turbidez);
-    delayMicroseconds(100);
+    temporizador(1);
 
     // Repetimos 800 veces la medicion para tener el dato mas veridico posible
     for (int i = 0; i < cant_de_lecturas; i++)
@@ -87,7 +87,7 @@ float medicion_de_ph()
     for (int i = 0; i < cantidad_de_lecturas; i++)
     {
         voltaje = +analogRead(sensor_de_ph);
-        delay(10);
+        temporizador(10);
     }
 
     voltaje /= cantidad_de_lecturas;
@@ -233,11 +233,11 @@ void indicador(int cant, int vel)
     for (int i = 0; i < cant; i++)
     {
         digitalWrite(led_interno, HIGH);
-        delay(vel);
+        temporizador(vel);
         digitalWrite(led_interno, LOW);
-        delay(vel);
+        temporizador(vel);
     }
-    delay(1000);
+    temporizador(1000);
 }
 
 // Indicador de fallos
@@ -246,21 +246,33 @@ void indicador_fallo(int cant)
     for (int i = 0; i <= cant; i++)
     {
         digitalWrite(led_interno, HIGH);
-        delay(1000);
+        temporizador(1000);
         digitalWrite(led_interno, LOW);
-        delay(100);
+        temporizador(100);
         digitalWrite(led_interno, HIGH);
-        delay(2000);
+        temporizador(2000);
         digitalWrite(led_interno, LOW);
-        delay(100);
+        temporizador(100);
         digitalWrite(led_interno, HIGH);
-        delay(1000);
+        temporizador(1000);
         digitalWrite(led_interno, LOW);
-        delay(100);
+        temporizador(100);
     }
 }
 
 bool test_gps()
 {
     return gpsSerial.available() > 0;
+}
+
+bool temporizador (unsigned long intervalo) {
+    static unsigned long tiempo_anterior = 0;
+    unsigned long ahora = millis();
+
+    if (ahora - tiempo_anterior >= intervalo)
+    {
+        tiempo_anterior = ahora;
+        return true;
+    }
+    return false;
 }

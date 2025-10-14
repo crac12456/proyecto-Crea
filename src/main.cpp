@@ -60,6 +60,7 @@
 #include "config.h"
 
 // ================== Headers de las funciones ==================
+void tareaBluetooth(void * pvParameters);
 bool test_gps();
 void conectar_wifi();
 bool mqtt_reconect();
@@ -116,6 +117,15 @@ void setup()
   client.setCallback(callback);
 
   serialbt.begin("Smart Blue Sentinel");
+  xTaskCreate(
+    tareaBluetooth,    // función
+    "BT Task",         // nombre
+    4096,              // stack
+    NULL,              // parámetro
+    1,                 // prioridad
+    NULL               // handle
+  );
+
 
   // Indicamos que el setup se termino correctamente
   indicador(1, 2);
@@ -138,6 +148,8 @@ void loop()
     Serial.print("conectando a mqtt");
     mqtt_reconect();
   }
+
+  void tareaBluetooth(void * pvParameters)
 
   if (serialbt.available())
   {
@@ -233,7 +245,7 @@ void conectar_wifi()
   // Verifica la cantidad de intentos de conectarse con la red
   while (WiFi.status() != WL_CONNECTED && intentos < max_intentos)
   {
-    delay(500);
+    temporizador(500);
     Serial.print(".");
     indicador(0, 0);
     intentos++;
@@ -453,8 +465,7 @@ void procesar_buffer()
       break;
     }
   }
-
-  delay(100);
+  temporizador(100);
 }
 
 void enviar_datos()
@@ -529,25 +540,40 @@ void debug_info()
   Serial.print("\nLa velocidad es: ");
   Serial.print(velocidad);
   Serial.print("\n");
-  delay(1000);
+  temporizador(1000);
 }
 
 void test_motores()
 {
   Serial.println("Adelante");
   motores_adelante();
-  delay(100);
+  temporizador(100);
   motores_detener();
 
   //Serial.println("Derecha");
   //motores_derecha();
-  //delay(100);
+  //temporizador(100);
 
   //Serial.println("Izquierda");
   //motores_izquierda();
-  //delay(100);
+  //temporizador(100);
   
   //Serial.println("Detener");
   //motores_detener();
-  //delay(100);
+  //temporizador(100);
+}
+
+void tareaBluetooth(void * pvParameters) {
+  for(;;) {
+    if (serialbt.available())
+    {
+      mensajeBT = serialbt.read();
+      control_motores(mensajeBT);
+      
+      Serial.println("Se ha conectado al dispositivo por BT");
+      Serial.println("mensaje: ");
+      Serial.println(mensajeBT);
+    }
+    vTaskDelay(10 / portTICK_PERIOD_MS); // Le da tiempo a otras tareas
+  }
 }

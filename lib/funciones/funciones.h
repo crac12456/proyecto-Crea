@@ -23,6 +23,7 @@ void indicador(int cant, int vel);
 void indicador_fallo(int cant);
 
 bool test_gps();
+bool temporizador (unsigned long intervalo);
 
 #endif
 
