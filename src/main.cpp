@@ -149,8 +149,6 @@ void loop()
     mqtt_reconect();
   }
 
-  void tareaBluetooth(void * pvParameters)
-
   if (serialbt.available())
   {
     mensajeBT = serialbt.read();
