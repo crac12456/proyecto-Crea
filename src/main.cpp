@@ -116,6 +116,7 @@ void setup()
   client.setServer(mqtt_server, mqtt_port);
   client.setCallback(callback);
 
+  //setup de tarea asincrona 
   serialbt.begin("Smart Blue Sentinel");
   xTaskCreate(
     tareaBluetooth,    // función
@@ -210,6 +211,7 @@ void loop()
     }
   }
 
+  //Revisa el buffer para evitar memory leak 
   static unsigned long ultimoEstado = 0;
   if (millis() - ultimoEstado >= 60000)
   {
@@ -488,6 +490,7 @@ void enviar_datos()
       }
     }
 
+    // si no se puede enviar por mqtt se envia por html
     if (!enviado)
     {
       Serial.println("Cambiando a http");
@@ -501,7 +504,7 @@ void enviar_datos()
   }
   else
   {
-    Serial.println("El WiFi esta desconectado, intentado reconectar . . . ");
+    Serial.println("El WiFi esta desconectado, intentado reconectar ");
     conectar_wifi();
   }
 
