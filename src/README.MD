@@ -41,12 +41,13 @@ Este apartado se uniza para iniciar las funciones, librerias y cosas necesarias 
 
 - __pines:__ En este declaramos para que usaremos los pines, si son input o output, esencial para el funcionamiento del proyecto, en el codigo opodremos ver para que es cada pin y todo tienen nombres descriptivos.
 - __setup__ En esta parte se inician cosas como la coneccon con el wifi, con el broker mqtt y verificamos que los motores esten apagados.
+- __asincrono:__ Este apartado esta para que bluetooth funcione de forma paralela al resto de procesos en modo de multitarea, para evitar retrasos en el control del robot
 
 ## Loop
 
 En arduino, el loop es el bucle que se ejecuta de forma infinita en el cual se realizan todos los procesos del microcontrolador, en este tenemos el codigo que controlara al robot y se llaman a las funciones o driver necesarios.
 
-- __Coneccion con las redes:__ En este apartado, se conecta al wifi y a la red y comprueva continuamente que estas conecciones se mantengan, en este caso tenemos la coneccion con el broker mqtt, el loop del cliente, que envia los datos y recibe continuamente, la verificacion de la coneccion al internet y tambien el gps se conecta con los satelites para conseguir la informacion necesaria, aparte de eso tenemos unas funciones donde almacenamos los datos de los sensores para su uso posterior.
+- __Coneccion con las redes:__ En este apartado, se conecta al wifi y a la red y comprueva continuamente que estas conecciones se mantengan, en este caso tenemos la coneccion con el broker mqtt o el servidor por http, el loop del cliente, que envia los datos y recibe continuamente, la verificacion de la coneccion al internet y tambien el gps se conecta con los satelites para conseguir la informacion necesaria, aparte de eso tenemos unas funciones donde almacenamos los datos de los sensores para su uso posterior.
 
 - __Envio y recepcion de datos:__ En este apartado, nos aseguramos de que la coneccion con mqtt se mantenga, tambien conseguimos los datos del gps en caso de que este funcione y llamamos a la funcion que envia los datos.
 
@@ -58,4 +59,9 @@ En este ultimo apartado tenemos diferentes funciones que utilizamos anteriorment
 - __mqtt_reconect:__ Esta funcion se encarga de conectarse al broker mqtt, esta necesita la ip del servidor y el puerto al cual conectarse, asi como se suscribe a su tema espesifico, tambien, verifica que la coneccion se mantenga en el tiempo.
 - __gps_coneccion:__ Esta se asegura de que el gps se encuetre conectado en todo momento.
 - __callback:__ Esta funcion es la que se encarga de recibir los mensajes del broker mqtt, y para ahorrar espacio tambien tiene el apartado en la que se controlan los motores segun la informacion que reciba del broker.
+- __crear_json:__ Json es un formato utilizado para enviar y recibir mensajes por medio de http, es la forma en la que el esp32 se comunica con la pagina en caso de que el broker no este disponible, la función se encarga de conseguir los datos y convertirlos en un json para su envio
+- __envio_mqtt:__ Envia los datos en el formato json anteriormente creado por medio de mqtt
+- __envio_http:__ Envia el mismo json por medio de http (internet)
+- __agregar_buffer:__ En caso de que los datos no se puedan enviar, guarda los datos en un buffer
+- __procesar_buffer:__ verifica el tamaño del buffer, y en caso de que ni el mqtt ni el http funcione
 - __envio_de_datos:__ Esta es la parte en la cual se envia los datos de los sensores a la pagina web, lo primero que vemos es la creacion del documento json el cual sera enviado a la pagina, al fina de este tenemos el envio al broker.

@@ -115,8 +115,8 @@ void setup()
   mqtt_reconect();
   client.setServer(mqtt_server, mqtt_port);
   client.setCallback(callback);
-
-  //setup de tarea asincrona 
+  
+  // ========================= Tareas Asincronas ==========================
   serialbt.begin("Smart Blue Sentinel");
   xTaskCreate(
     tareaBluetooth,    // función
