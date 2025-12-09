@@ -550,20 +550,9 @@ void test_motores()
   motores_adelante();
   temporizador(100);
   motores_detener();
-
-  //Serial.println("Derecha");
-  //motores_derecha();
-  //temporizador(100);
-
-  //Serial.println("Izquierda");
-  //motores_izquierda();
-  //temporizador(100);
-  
-  //Serial.println("Detener");
-  //motores_detener();
-  //temporizador(100);
 }
 
+// ===================== Tarea en paralelo ========================== 
 void tareaBluetooth(void * pvParameters) {
   for(;;) {
     if (serialbt.available())

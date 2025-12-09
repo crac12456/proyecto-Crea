@@ -129,32 +129,43 @@ float medicion_temperatura()
 
 // ================== Controles de los motores ==================
 
-void control_motores(char mensaje) {    
+void control_motores(char mensaje) {
+    /*
+    * Esta función recibe el mensaje enviado por bt 
+    * Luego dependiendo de este, activa los motores
+    * Esta programado para apagarse despues de 1ms   
+    */ 
     Serial.println("procesando mensaje");
 
     switch (mensaje)
     {
         case 'F':
             Serial.println("Mensaje recibido, motores adelante");
+            temporizador(1);
             motores_adelante();
             break;
         case 'B':
             Serial.println("Mensaje recibido, motores atras");
+            temporizador(1);
             motores_atras();
             break;
         case 'R':
             Serial.println("Mensaje recibido, motores derecha");
+            temporizador(1);
             motores_derecha();
             break;
         case 'L':
             Serial.println("Mensaje recibido, motores izquierda");
+            temporizador(1);
             motores_izquierda();
             break;
         case 'S':
             Serial.println("Mensaje recibido, motores detener");
+            temporizador(1);
             motores_detener();
             break;
         default:
+            motores_detener();
             break;
     }
 }
